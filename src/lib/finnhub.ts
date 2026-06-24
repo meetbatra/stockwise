@@ -71,7 +71,7 @@ export async function fetchProfile(
   }
 }
 
-/** GET /stock/candle — OHLCV history, normalised to CandlePoint[] */
+/** GET /stock/candle — OHLCV history, normalised to CandlePoint[] (now using Yahoo Finance to bypass Finnhub free tier limits) */
 export async function fetchCandles(
   ticker: string,
   resolution: '1' | '5' | '15' | '30' | '60' | 'D' | 'W' | 'M' = 'D',
@@ -82,29 +82,53 @@ export async function fetchCandles(
   // Default: last 90 trading days ≈ ~130 calendar days
   const from = fromUnix ?? now - 130 * 24 * 60 * 60
 
-  const raw = await finnhubFetch<Candles>('/stock/candle', {
-    symbol: ticker.toUpperCase(),
-    resolution,
-    from: String(from),
-    to: String(now),
-  })
+  // Map Finnhub resolutions to Yahoo Finance intervals
+  const intervalMap: Record<string, string> = {
+    '1': '1m',
+    '5': '5m',
+    '15': '15m',
+    '30': '30m',
+    '60': '60m',
+    D: '1d',
+    W: '1wk',
+    M: '1mo',
+  }
+  const interval = intervalMap[resolution] ?? '1d'
 
-  if (raw.s !== 'ok' || !raw.t?.length) return []
+  const yahooTicker = ticker.toUpperCase().replace('.', '-')
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooTicker}?period1=${from}&period2=${now}&interval=${interval}`
 
-  const o = raw.o as number[]
-  const h = raw.h as number[]
-  const l = raw.l as number[]
-  const c = raw.c as number[]
-  const v = raw.v as number[]
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+      next: { revalidate: 30 },
+    })
 
-  return raw.t.map((time, i) => ({
-    time,
-    open: (raw.o[i] as number),
-    high: (raw.h[i] as number),
-    low: (raw.l[i] as number),
-    close: (raw.c[i] as number),
-    volume: (raw.v[i] as number),
-  }))
+    if (!res.ok) return []
+
+    const data = await res.json()
+    const result = data?.chart?.result?.[0]
+    if (!result || !result.timestamp || !result.indicators?.quote?.[0]) {
+      return []
+    }
+
+    const timestamps = result.timestamp as number[]
+    const quote = result.indicators.quote[0]
+
+    return timestamps.map((time, i) => ({
+      time,
+      open: quote.open[i] ?? 0,
+      high: quote.high[i] ?? 0,
+      low: quote.low[i] ?? 0,
+      close: quote.close[i] ?? 0,
+      volume: quote.volume[i] ?? 0,
+    }))
+  } catch {
+    return []
+  }
 }
 
 /** GET /company-news — recent news articles */

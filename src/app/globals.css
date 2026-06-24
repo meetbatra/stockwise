@@ -43,6 +43,21 @@
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
+  --color-surface-card: #0A0A0A;
+  --color-surface-hover: #0F0F0F;
+  --color-border-active: #262626;
+  --color-border-hairline: #1A1A1A;
+  --color-on-surface-variant: #c4c7c8;
+  --color-trend-up: #22C55E;
+  --color-trend-down: #EF4444;
+  --color-surface-container-lowest: #0e0e0e;
+  --font-headline-lg-mobile: var(--font-hanken), sans-serif;
+  --font-headline-lg: var(--font-hanken), sans-serif;
+  --font-label-caps: var(--font-jetbrains), monospace;
+  --font-display-lg: var(--font-hanken), sans-serif;
+  --font-body-md: var(--font-geist-sans), sans-serif;
+  --font-body-sm: var(--font-geist-sans), sans-serif;
+  --font-data-mono: var(--font-jetbrains), monospace;
 }
 
 /* ─── Stockwise dark theme ────────────────────────────────────────────────── */
@@ -58,8 +73,8 @@
   --popover: oklch(0.13 0.006 264);
   --popover-foreground: oklch(0.96 0 0);
 
-  --primary: oklch(0.75 0.18 153);
-  --primary-foreground: oklch(0.10 0 0);
+  --primary: #ffffff;
+  --primary-foreground: #000000;
 
   --secondary: oklch(0.18 0.006 264);
   --secondary-foreground: oklch(0.80 0 0);

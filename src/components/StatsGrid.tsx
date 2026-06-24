@@ -1,5 +1,4 @@
 import { Building2, Globe, DollarSign, BarChart3 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { CompanyProfile, Quote } from '@/lib/types'
 
@@ -72,51 +71,49 @@ export function StatsGrid({ quote, profile }: StatsGridProps) {
   ]
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
       {stats.map(({ label, value, icon: Icon, positive, negative }) => (
-        <Card
+        <div
           key={label}
-          className="border-border/50 bg-card/60 animate-fade-up"
+          className="rounded-xl border border-hairline bg-black/20 p-4 transition-colors hover:bg-black/40"
         >
-          <CardContent className="p-3.5 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-muted-foreground">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5 text-slate-400">
               <Icon className="h-3.5 w-3.5" />
-              <span className="text-xs">{label}</span>
+              <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
             </div>
             <p
               className={[
-                'text-sm font-semibold tabular-nums truncate',
+                'text-lg font-mono font-medium truncate',
                 positive ? 'text-emerald-400' : '',
-                negative ? 'text-rose-400' : '',
+                negative ? 'text-rose-400' : 'text-slate-200',
               ]
                 .filter(Boolean)
                 .join(' ')}
             >
               {value}
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
 
       {/* Website link */}
       {profile?.weburl && (
-        <Card className="border-border/50 bg-card/60 col-span-2 sm:col-span-4 animate-fade-up">
-          <CardContent className="p-3.5 flex items-center gap-2">
-            <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-            <span className="text-xs text-muted-foreground">Website</span>
-            <a
-              href={profile.weburl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-emerald-400 hover:underline truncate ml-1"
-            >
-              {profile.weburl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-            </a>
-            <Badge variant="outline" className="ml-auto text-[10px] shrink-0">
-              {profile.country}
-            </Badge>
-          </CardContent>
-        </Card>
+        <div className="col-span-2 sm:col-span-4 rounded-xl border border-hairline bg-black/20 p-4 flex items-center gap-2 transition-colors hover:bg-black/40">
+          <Globe className="h-4 w-4 text-slate-400 shrink-0" />
+          <span className="text-xs font-medium uppercase tracking-wider text-slate-400">Website</span>
+          <a
+            href={profile.weburl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-emerald-400 hover:text-emerald-300 hover:underline truncate ml-1 font-mono"
+          >
+            {profile.weburl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+          </a>
+          <Badge variant="outline" className="ml-auto text-[10px] shrink-0 border-hairline bg-black/20 text-slate-300">
+            {profile.country}
+          </Badge>
+        </div>
       )}
     </div>
   )

@@ -95,7 +95,7 @@ export function StockChart({ ticker }: StockChartProps) {
 
       {/* Chart body */}
       {isLoading ? (
-        <Skeleton className="h-60 w-full rounded-xl" />
+        <Skeleton className="h-60 w-full rounded-xl bg-slate-800/50" />
       ) : error || !formatted.length ? (
         <div className="flex h-60 items-center justify-center text-sm text-muted-foreground">
           {error ?? 'No chart data available for this range.'}

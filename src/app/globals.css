@@ -61,7 +61,7 @@
 }
 
 /* ─── Stockwise dark theme ────────────────────────────────────────────────── */
-:root {
+:root, .dark {
   color-scheme: dark;
 
   --background: oklch(0.10 0.005 264);

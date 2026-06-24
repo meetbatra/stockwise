@@ -30,12 +30,18 @@ export function NewsPanel({ ticker }: NewsPanelProps) {
       </div>
 
       {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-4 w-full bg-slate-800/50" />
-              <Skeleton className="h-4 w-4/5 bg-slate-800/50" />
-              <Skeleton className="h-3 w-24 bg-slate-800/50" />
+        <div className="space-y-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="flex gap-4 items-start">
+              <Skeleton className="h-14 w-20 shrink-0 rounded-lg bg-slate-800/50" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-full bg-slate-800/50" />
+                <Skeleton className="h-4 w-4/5 bg-slate-800/50" />
+                <div className="flex items-center gap-2 pt-1">
+                  <Skeleton className="h-3 w-16 bg-slate-800/50" />
+                  <Skeleton className="h-3 w-12 bg-slate-800/50" />
+                </div>
+              </div>
             </div>
           ))}
         </div>

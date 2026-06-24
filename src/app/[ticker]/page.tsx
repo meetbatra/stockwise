@@ -13,10 +13,9 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { ticker } = await params
   const t = ticker.toUpperCase()
-  const profile = await fetchProfile(t).catch(() => null)
   return {
-    title: `${t} — ${profile?.name ?? ticker}`,
-    description: `Real-time price, chart, and news for ${profile?.name ?? t} (${t}).`,
+    title: `${t} | Stockwise`,
+    description: `Real-time price, chart, and news for ${t}.`,
   }
 }
 

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { fetchCandles } from '@/lib/yahoo'
+import { fetchCandles } from '@/lib/yahoo-fetch'
 
 type Params = { ticker: string }
 

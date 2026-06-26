@@ -1,11 +1,12 @@
 import { Globe, DollarSign, BarChart3 } from 'lucide-react'
-import type { YahooMeta } from '@/lib/types'
+import type { FullStockData } from '@/lib/yahoo-fetch'
 
 interface StatsGridProps {
-  meta: YahooMeta
+  meta: FullStockData
 }
 
 function fmt(n: number, digits = 2) {
+  if (n === undefined || n === null) return 'N/A'
   return n.toLocaleString('en-US', {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
@@ -13,6 +14,7 @@ function fmt(n: number, digits = 2) {
 }
 
 function fmtVolume(n: number): string {
+  if (n === undefined || n === null) return 'N/A'
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(2)}K`
@@ -23,24 +25,24 @@ export function StatsGrid({ meta }: StatsGridProps) {
   const stats = [
     {
       label: 'Open',
-      value: `$${fmt(meta.regularMarketPrice)}`,
+      value: `$${fmt(meta.price)}`,
       icon: DollarSign,
     },
     {
       label: "Day's High",
-      value: `$${fmt(meta.regularMarketDayHigh)}`,
+      value: `$${fmt(meta.dayHigh)}`,
       icon: DollarSign,
       positive: true,
     },
     {
       label: "Day's Low",
-      value: `$${fmt(meta.regularMarketDayLow)}`,
+      value: `$${fmt(meta.dayLow)}`,
       icon: DollarSign,
       negative: true,
     },
     {
       label: 'Volume',
-      value: fmtVolume(meta.regularMarketVolume),
+      value: fmtVolume(meta.volume),
       icon: BarChart3,
     },
     {
@@ -57,12 +59,12 @@ export function StatsGrid({ meta }: StatsGridProps) {
     },
     {
       label: 'Exchange',
-      value: meta.exchangeName,
+      value: meta.exchange || 'N/A',
       icon: Globe,
     },
     {
       label: 'Currency',
-      value: meta.currency,
+      value: meta.currency || 'USD',
       icon: DollarSign,
     },
   ]

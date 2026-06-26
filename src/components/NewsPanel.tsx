@@ -4,11 +4,13 @@ import { ExternalLink, Newspaper, KeyRound } from 'lucide-react'
 import { useStockNews } from '@/hooks/useStockNews'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import type { NewsArticle } from '@/lib/types'
 
 interface NewsPanelProps {
   ticker: string
   /** When true, the API key is configured server-side */
   hasApiKey?: boolean
+  initialNews?: NewsArticle[] | undefined
 }
 
 function timeAgo(unixSeconds: number): string {
@@ -18,8 +20,8 @@ function timeAgo(unixSeconds: number): string {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
-export function NewsPanel({ ticker, hasApiKey = true }: NewsPanelProps) {
-  const { news, isLoading, error } = useStockNews(ticker, 8)
+export function NewsPanel({ ticker, hasApiKey = true, initialNews }: NewsPanelProps) {
+  const { news, isLoading, error } = useStockNews(ticker, 8, initialNews)
 
   return (
     <div className="space-y-4 animate-fade-up">

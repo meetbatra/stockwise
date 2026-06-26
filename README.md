@@ -1,4 +1,4 @@
-# Stockwise — Premium Stock Analytics Dashboard
+# Stockwise — Stock Analytics Dashboard
 
 A modern, real-time stock analytics and tracking dashboard built with Next.js 16 (App Router). Stockwise offers a highly optimized, responsive, and visually stunning data-dense UI designed to give users a comprehensive view of the top 50 US equities, interactive price charts, key company statistics, and the latest financial news.
 
@@ -7,7 +7,7 @@ A modern, real-time stock analytics and tracking dashboard built with Next.js 16
 - **Real-Time Market Data**: Live tracking of the top 50 market movers and day gainers.
 - **Interactive Stock Charts**: Seamless, cache-optimized area charts for tracking stock performance across multiple time ranges (1W, 1M, 6M, 1Y).
 - **Search & Filter Ecosystem**: Debounced global search across names and tickers, coupled with URL-synchronized category filters for highly shareable states.
-- **Premium Design System**: Built with Tailwind CSS v4 and Shadcn UI, featuring micro-animations, glassmorphic elements, and a cohesive dark-mode aesthetic.
+- **Design System**: Built with Tailwind CSS v4 and Shadcn UI, featuring micro-animations, glassmorphic elements, and a cohesive dark-mode aesthetic.
 - **Detailed Asset View**: Dedicated dynamic routing (`/[ticker]`) for deep-dives into individual stock statistics and related financial news.
 - **Resilient UX**: Custom loading skeletons, zero-layout-shift design, and robust error boundaries.
 

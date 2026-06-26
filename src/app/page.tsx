@@ -155,7 +155,7 @@ function HomeContent() {
       </section>
 
       {/* Controls: Search and Count */}
-      <section className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between animate-fade-up">
+      <section className="flex flex-col sm:flex-row gap-4 items-start justify-between animate-fade-up">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant pointer-events-none" />
           <input
@@ -166,9 +166,59 @@ function HomeContent() {
             className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface-card border border-border-hairline text-sm text-primary placeholder:text-on-surface-variant focus:outline-none focus:border-ring/50 focus:ring-1 focus:ring-ring/30 transition-colors"
           />
         </div>
-        <div className="text-sm text-on-surface-variant">
-          Showing {totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
-          {Math.min(page * PAGE_SIZE, totalItems)} of {totalItems} stocks
+        <div className="flex flex-col items-start gap-2">
+          <div className="text-sm text-on-surface-variant">
+            Showing {totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
+            {Math.min(page * PAGE_SIZE, totalItems)} of {totalItems} stocks
+          </div>
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <nav className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }).map((_, i) => {
+                  const p = i + 1
+                  if (
+                    p === 1 || 
+                    p === totalPages || 
+                    (p >= page - 1 && p <= page + 1)
+                  ) {
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                          page === p
+                            ? 'bg-ring/15 text-ring border border-ring/30'
+                            : 'text-on-surface-variant hover:bg-border-active hover:text-primary'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  } else if (p === page - 2 || p === page + 2) {
+                    return <span key={p} className="flex items-center justify-center w-9 h-9 text-sm text-on-surface-variant/50">...</span>
+                  }
+                  return null
+                })}
+              </div>
+
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </nav>
+          )}
         </div>
       </section>
 
@@ -247,55 +297,7 @@ function HomeContent() {
         </div>
       )}
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <nav className="flex items-center justify-center gap-2 mt-4 animate-fade-up">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          
-          <div className="flex gap-1">
-            {Array.from({ length: totalPages }).map((_, i) => {
-              const p = i + 1
-              // Simple pagination logic for demo
-              if (
-                p === 1 || 
-                p === totalPages || 
-                (p >= page - 1 && p <= page + 1)
-              ) {
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                      page === p
-                        ? 'bg-ring/15 text-ring border border-ring/30'
-                        : 'text-on-surface-variant hover:bg-border-active hover:text-primary'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                )
-              } else if (p === page - 2 || p === page + 2) {
-                return <span key={p} className="flex items-center justify-center w-9 h-9 text-sm text-on-surface-variant/50">...</span>
-              }
-              return null
-            })}
-          </div>
 
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </nav>
-      )}
     </div>
   )
 }

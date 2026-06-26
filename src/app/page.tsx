@@ -148,11 +148,10 @@ function HomeContent() {
           <button
             key={s.id}
             onClick={() => handleScreenerChange(s.id)}
-            className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors border border-border-hairline ${
-              screener === s.id
+            className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors border border-border-hairline ${screener === s.id
                 ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-surface-card text-on-surface-variant hover:text-primary hover:border-border-active'
-            }`}
+              }`}
           >
             {s.label}
           </button>
@@ -167,8 +166,9 @@ function HomeContent() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            disabled={loading}
             placeholder="Search symbol or name..."
-            className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface-card border border-border-hairline text-sm text-primary placeholder:text-on-surface-variant focus:outline-none focus:border-ring/50 focus:ring-1 focus:ring-ring/30 transition-colors"
+            className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface-card border border-border-hairline text-sm text-primary placeholder:text-on-surface-variant focus:outline-none focus:border-ring/50 focus:ring-1 focus:ring-ring/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         <div className="text-sm text-on-surface-variant">
@@ -206,19 +206,19 @@ function HomeContent() {
             const trendColorClass = isUp
               ? 'text-trend-up'
               : isDown
-              ? 'text-trend-down'
-              : 'text-on-surface-variant'
+                ? 'text-trend-down'
+                : 'text-on-surface-variant'
             const trendBgClass = isUp
               ? 'bg-trend-up/10 border-trend-up/20'
               : isDown
-              ? 'bg-trend-down/10 border-trend-down/20'
-              : 'bg-surface-container-high border-border-hairline'
+                ? 'bg-trend-down/10 border-trend-down/20'
+                : 'bg-surface-container-high border-border-hairline'
 
             return (
               <Link key={stock.symbol} href={`/${stock.symbol}`} className="group block">
-                <article className="bg-surface-card rounded-xl p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 relative overflow-hidden border border-border-hairline hover:border-border-active">
+                <article className="bg-surface-card rounded-xl p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center cursor-pointer transition-all duration-300 relative overflow-hidden border border-border-hairline hover:border-border-active">
                   <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
-                  
+
                   {/* Symbol & Name */}
                   <div className="flex items-center gap-3 z-10">
                     <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
@@ -248,7 +248,7 @@ function HomeContent() {
                   <div className="hidden lg:block text-right z-10">
                     <div className="font-label-md text-sm text-on-surface font-bold">${stock.price?.toFixed(2) ?? 'N/A'}</div>
                   </div>
-                  
+
                   {/* Desktop Change */}
                   <div className="hidden lg:flex justify-end z-10">
                     <div className={`${trendBgClass} border rounded-full px-2 py-1 flex items-center gap-1`}>
@@ -291,30 +291,30 @@ function HomeContent() {
         <nav className="flex items-center justify-center gap-2 mt-4 animate-fade-up">
           <button
             onClick={() => handlePageChange(p => Math.max(1, p - 1))}
-            disabled={page === 1}
+            disabled={page === 1 || loading}
             className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          
+
           <div className="flex gap-1">
             {Array.from({ length: totalPages }).map((_, i) => {
               const p = i + 1
               // Simple pagination logic for demo
               if (
-                p === 1 || 
-                p === totalPages || 
+                p === 1 ||
+                p === totalPages ||
                 (p >= page - 1 && p <= page + 1)
               ) {
                 return (
                   <button
                     key={p}
                     onClick={() => handlePageChange(p)}
-                    className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                      page === p
+                    disabled={loading}
+                    className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${page === p
                         ? 'bg-ring/15 text-ring border border-ring/30'
                         : 'text-on-surface-variant hover:bg-border-active hover:text-primary'
-                    }`}
+                      }`}
                   >
                     {p}
                   </button>
@@ -328,7 +328,7 @@ function HomeContent() {
 
           <button
             onClick={() => handlePageChange(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
+            disabled={page === totalPages || loading}
             className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronRight className="h-4 w-4" />

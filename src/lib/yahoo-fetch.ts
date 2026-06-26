@@ -74,7 +74,7 @@ function formatExchange(exchange: string | undefined): string {
 export async function fetchScreener(screenerId: string, size: number = 50): Promise<StockData[]> {
   const url = new URL('https://query2.finance.yahoo.com/v1/finance/screener/predefined/saved')
   url.searchParams.set('scrIds', screenerId)
-  url.searchParams.set('size', size.toString())
+  url.searchParams.set('count', size.toString())
   url.searchParams.set('lang', 'en-US')
   url.searchParams.set('region', 'US')
   url.searchParams.set('formatted', 'false')

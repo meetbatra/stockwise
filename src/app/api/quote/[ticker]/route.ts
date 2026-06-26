@@ -1,6 +1,5 @@
-import { type NextRequest } from 'next/server'
-import { fetchQuote } from '@/lib/finnhub'
-import type { ApiErrorResponse, ApiQuoteResponse } from '@/lib/types'
+import { type NextRequest, NextResponse } from 'next/server'
+import { fetchChartMeta } from '@/lib/yahoo'
 
 type Params = { ticker: string }
 
@@ -11,13 +10,9 @@ export async function GET(
   const { ticker } = await params
 
   try {
-    const quote = await fetchQuote(ticker)
-    return Response.json({ quote } satisfies ApiQuoteResponse)
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : 'Failed to fetch quote'
-    return Response.json({ error: message } satisfies ApiErrorResponse, {
-      status: 500,
-    })
+    const meta = await fetchChartMeta(ticker)
+    return NextResponse.json(meta)
+  } catch {
+    return NextResponse.json({ error: 'Failed to fetch quote' }, { status: 500 })
   }
 }

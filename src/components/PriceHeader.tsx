@@ -5,14 +5,12 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQuote } from '@/hooks/useQuote'
 import { cn } from '@/lib/utils'
-import type { CompanyProfile } from '@/lib/types'
 
 interface PriceHeaderProps {
   ticker: string
-  profile: CompanyProfile | null
 }
 
-export function PriceHeader({ ticker, profile }: PriceHeaderProps) {
+export function PriceHeader({ ticker }: PriceHeaderProps) {
   const { quote, isLoading, error, refresh } = useQuote(ticker, {
     refreshInterval: 15_000,
   })
@@ -33,7 +31,10 @@ export function PriceHeader({ ticker, profile }: PriceHeaderProps) {
     )
   }
 
-  const change = quote.dp
+  const price = quote.regularMarketPrice
+  const prevClose = quote.chartPreviousClose
+  const change = price - prevClose
+  const changePct = prevClose !== 0 ? (change / prevClose) * 100 : 0
   const isUp = change > 0
   const isDown = change < 0
   const TrendIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus
@@ -42,20 +43,14 @@ export function PriceHeader({ ticker, profile }: PriceHeaderProps) {
     <div className="animate-fade-up space-y-4">
       {/* Company name + exchange */}
       <div className="flex items-center gap-4">
-        {profile?.logo && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profile.logo}
-            alt={ticker}
-            className="h-12 w-12 rounded-xl object-contain bg-white/5 p-2 border border-hairline"
-          />
-        )}
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">
-            {profile?.name ?? ticker}
+            {quote.longName || ticker}
           </h1>
           <p className="text-sm font-medium text-slate-400 tracking-wide uppercase mt-1">
-            {ticker} <span className="mx-1.5 opacity-50">·</span> {profile?.exchange ?? 'NASDAQ'} <span className="mx-1.5 opacity-50">·</span> {profile?.currency ?? 'USD'}
+            {ticker} <span className="mx-1.5 opacity-50">·</span>{' '}
+            {quote.exchangeName} <span className="mx-1.5 opacity-50">·</span>{' '}
+            {quote.currency}
           </p>
         </div>
       </div>
@@ -63,7 +58,7 @@ export function PriceHeader({ ticker, profile }: PriceHeaderProps) {
       {/* Price row */}
       <div className="flex flex-wrap items-end gap-4 bg-surface-card border border-hairline p-5 rounded-2xl">
         <span className="text-5xl font-mono font-semibold tabular-nums tracking-tight text-white">
-          ${quote.c.toFixed(2)}
+          ${price.toFixed(2)}
         </span>
 
         <Badge
@@ -78,12 +73,14 @@ export function PriceHeader({ ticker, profile }: PriceHeaderProps) {
           )}
         >
           <TrendIcon className="h-4 w-4 mr-2" />
-          {change > 0 ? '+' : ''}${quote.d.toFixed(2)} ({change > 0 ? '+' : ''}
-          {change.toFixed(2)}%)
+          {change > 0 ? '+' : ''}${Math.abs(change).toFixed(2)} (
+          {changePct > 0 ? '+' : ''}
+          {changePct.toFixed(2)}%)
         </Badge>
 
         <span className="text-sm font-mono text-slate-400 self-end pb-1">
-          Prev Close: <span className="text-slate-200">${quote.pc.toFixed(2)}</span>
+          Prev Close:{' '}
+          <span className="text-slate-200">${prevClose.toFixed(2)}</span>
         </span>
 
         {/* Live indicator */}
@@ -100,7 +97,6 @@ function PriceHeaderSkeleton() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
-        <Skeleton className="h-12 w-12 rounded-xl" />
         <div className="space-y-2">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-4 w-32" />
@@ -113,4 +109,3 @@ function PriceHeaderSkeleton() {
     </div>
   )
 }
-

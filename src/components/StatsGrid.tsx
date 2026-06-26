@@ -1,10 +1,8 @@
-import { Building2, Globe, DollarSign, BarChart3 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import type { CompanyProfile, Quote } from '@/lib/types'
+import { Globe, DollarSign, BarChart3 } from 'lucide-react'
+import type { YahooMeta } from '@/lib/types'
 
 interface StatsGridProps {
-  quote: Quote
-  profile: CompanyProfile | null
+  meta: YahooMeta
 }
 
 function fmt(n: number, digits = 2) {
@@ -14,59 +12,58 @@ function fmt(n: number, digits = 2) {
   })
 }
 
-function fmtLarge(n: number): string {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}T`
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(2)}B`
-  return `$${n.toFixed(2)}M`
+function fmtVolume(n: number): string {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(2)}K`
+  return String(n)
 }
 
-export function StatsGrid({ quote, profile }: StatsGridProps) {
+export function StatsGrid({ meta }: StatsGridProps) {
   const stats = [
     {
-      label: 'Market Cap',
-      value: profile?.marketCapitalization
-        ? fmtLarge(profile.marketCapitalization)
-        : '—',
-      icon: BarChart3,
-    },
-    {
       label: 'Open',
-      value: `$${fmt(quote.o)}`,
+      value: `$${fmt(meta.regularMarketPrice)}`,
       icon: DollarSign,
     },
     {
       label: "Day's High",
-      value: `$${fmt(quote.h)}`,
+      value: `$${fmt(meta.regularMarketDayHigh)}`,
       icon: DollarSign,
       positive: true,
     },
     {
       label: "Day's Low",
-      value: `$${fmt(quote.l)}`,
+      value: `$${fmt(meta.regularMarketDayLow)}`,
       icon: DollarSign,
       negative: true,
     },
     {
-      label: 'Industry',
-      value: profile?.finnhubIndustry ?? '—',
-      icon: Building2,
-    },
-    {
-      label: 'Exchange',
-      value: profile?.exchange?.split(' ')[0] ?? '—',
-      icon: Globe,
-    },
-    {
-      label: 'Shares Out.',
-      value: profile?.shareOutstanding
-        ? `${(profile.shareOutstanding / 1000).toFixed(2)}B`
-        : '—',
+      label: 'Volume',
+      value: fmtVolume(meta.regularMarketVolume),
       icon: BarChart3,
     },
     {
-      label: 'IPO Date',
-      value: profile?.ipo ?? '—',
-      icon: Building2,
+      label: '52W High',
+      value: `$${fmt(meta.fiftyTwoWeekHigh)}`,
+      icon: DollarSign,
+      positive: true,
+    },
+    {
+      label: '52W Low',
+      value: `$${fmt(meta.fiftyTwoWeekLow)}`,
+      icon: DollarSign,
+      negative: true,
+    },
+    {
+      label: 'Exchange',
+      value: meta.exchangeName,
+      icon: Globe,
+    },
+    {
+      label: 'Currency',
+      value: meta.currency,
+      icon: DollarSign,
     },
   ]
 
@@ -96,25 +93,6 @@ export function StatsGrid({ quote, profile }: StatsGridProps) {
           </div>
         </div>
       ))}
-
-      {/* Website link */}
-      {profile?.weburl && (
-        <div className="col-span-2 sm:col-span-4 rounded-xl border border-hairline bg-black/20 p-4 flex items-center gap-2 transition-colors hover:bg-black/40">
-          <Globe className="h-4 w-4 text-slate-400 shrink-0" />
-          <span className="text-xs font-medium uppercase tracking-wider text-slate-400">Website</span>
-          <a
-            href={profile.weburl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-emerald-400 hover:text-emerald-300 hover:underline truncate ml-1 font-mono"
-          >
-            {profile.weburl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-          </a>
-          <Badge variant="outline" className="ml-auto text-[10px] shrink-0 border-hairline bg-black/20 text-slate-300">
-            {profile.country}
-          </Badge>
-        </div>
-      )}
     </div>
   )
 }

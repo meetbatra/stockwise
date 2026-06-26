@@ -11,6 +11,7 @@ interface UseStockNewsResult {
 
 /**
  * Fetches the latest company news articles for a ticker from /api/news/[ticker].
+ * Returns an empty array when the API key is missing (graceful fallback).
  */
 export function useStockNews(
   ticker: string,
@@ -24,10 +25,9 @@ export function useStockNews(
     if (!ticker) return
 
     const controller = new AbortController()
-    setIsLoading(true)
 
     fetch(
-      `/api/news/${encodeURIComponent(ticker)}?limit=${limit}`,
+      `/api/news/${encodeURIComponent(ticker)}`,
       { signal: controller.signal },
     )
       .then(async (res) => {
@@ -37,8 +37,8 @@ export function useStockNews(
         }
         return res.json()
       })
-      .then(({ news }) => {
-        setNews(news)
+      .then((data: NewsArticle[]) => {
+        setNews(Array.isArray(data) ? data.slice(0, limit) : [])
         setError(null)
       })
       .catch((err) => {

@@ -14,20 +14,18 @@ import { useStockChart } from '@/hooks/useStockChart'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
-type Resolution = '1' | '5' | '15' | '30' | '60' | 'D' | 'W' | 'M'
-
 interface Range {
   label: string
   days: number
-  resolution: Resolution
+  interval: string
 }
 
 const RANGES: Range[] = [
-  { label: '1W', days: 7, resolution: '60' },
-  { label: '1M', days: 30, resolution: 'D' },
-  { label: '3M', days: 90, resolution: 'D' },
-  { label: '6M', days: 180, resolution: 'D' },
-  { label: '1Y', days: 365, resolution: 'D' },
+  { label: '1W', days: 7, interval: '60m' },
+  { label: '1M', days: 30, interval: '1d' },
+  { label: '3M', days: 90, interval: '1d' },
+  { label: '6M', days: 180, interval: '1d' },
+  { label: '1Y', days: 365, interval: '1d' },
 ]
 
 interface StockChartProps {
@@ -36,16 +34,18 @@ interface StockChartProps {
 
 export function StockChart({ ticker }: StockChartProps) {
   const [rangeIdx, setRangeIdx] = useState(2) // default 3M
-  // rangeIdx is always a valid index — assert non-null
   const range = RANGES[rangeIdx]!
 
+  // Stable mount-time snapshot used to calculate "from" for chart requests
+  const [mountTime] = useState(() => Math.floor(Date.now() / 1000))
+
   const fromUnix = useMemo(
-    () => Math.floor((Date.now() - range.days * 86_400_000) / 1000),
-    [range.days],
+    () => mountTime - range.days * 86_400,
+    [mountTime, range.days],
   )
 
   const { candles, isLoading, error } = useStockChart(ticker, {
-    resolution: range.resolution,
+    interval: range.interval,
     from: fromUnix,
   })
 

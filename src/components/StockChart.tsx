@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts'
-import { useStockChart } from '@/hooks/useStockChart'
+import { useStockChart, chartCache } from '@/hooks/useStockChart'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { CandlePoint } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -32,9 +32,18 @@ const RANGES: Range[] = [
 interface StockChartProps {
   ticker: string
   initialCandles?: CandlePoint[] | undefined
+  initialWeeklyCandles?: CandlePoint[] | undefined
 }
 
-export function StockChart({ ticker, initialCandles }: StockChartProps) {
+export function StockChart({ ticker, initialCandles, initialWeeklyCandles }: StockChartProps) {
+  // Pre-populate cache synchronously so that switching ranges (like to 1W) hits the cache immediately
+  if (initialCandles && !chartCache.has(`${ticker}-1d`)) {
+    chartCache.set(`${ticker}-1d`, initialCandles)
+  }
+  if (initialWeeklyCandles && !chartCache.has(`${ticker}-60m`)) {
+    chartCache.set(`${ticker}-60m`, initialWeeklyCandles)
+  }
+
   const [rangeIdx, setRangeIdx] = useState(2) // default 3M
   const range = RANGES[rangeIdx]!
 
@@ -46,7 +55,7 @@ export function StockChart({ ticker, initialCandles }: StockChartProps) {
     {
       interval: range.interval,
       from: mountTime - range.days * 86_400,
-      initialData: rangeIdx === 2 ? initialCandles : undefined, // Only use initial data for the default 3M (1d) range
+      initialData: range.interval === '1d' ? initialCandles : initialWeeklyCandles,
     },
   )
 
@@ -87,9 +96,11 @@ export function StockChart({ ticker, initialCandles }: StockChartProps) {
   const fillId = `fill-${ticker}`
 
   const formatted = candles.map((c) => ({
-    date: new Date(c.time * 1000).toLocaleDateString('en-US', {
+    time: c.time,
+    fullDate: new Date(c.time * 1000).toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
+      ...(range.interval === '60m' ? { hour: 'numeric', minute: '2-digit' } : {}),
       ...(range.days > 180 ? { year: '2-digit' } : {}),
     }),
     close: c.close,
@@ -154,7 +165,21 @@ export function StockChart({ ticker, initialCandles }: StockChartProps) {
                 vertical={false}
               />
               <XAxis
-                dataKey="date"
+                dataKey="time"
+                tickFormatter={(val: number) => {
+                  const d = new Date(val * 1000)
+                  if (range.interval === '60m') {
+                    return d.toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      hour: 'numeric',
+                    })
+                  }
+                  return d.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    ...(range.days > 180 ? { year: '2-digit' } : {}),
+                  })
+                }}
                 tick={{ fontSize: 10, fill: 'oklch(0.56 0 0)' }}
                 tickLine={false}
                 axisLine={false}
@@ -175,13 +200,14 @@ export function StockChart({ ticker, initialCandles }: StockChartProps) {
                   const entry = payload[0]
                   if (!entry) return null
                   const d = entry.payload as {
-                    date: string
+                    time: number
+                    fullDate: string
                     close: number
                     volume: number
                   }
                   return (
                     <div className="rounded-lg border border-border/60 bg-popover px-3 py-2 shadow-xl text-xs space-y-1">
-                      <p className="font-medium text-foreground">{d.date}</p>
+                      <p className="font-medium text-foreground">{d.fullDate}</p>
                       <p
                         className="tabular-nums"
                         style={{ color: strokeColor }}

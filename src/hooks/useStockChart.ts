@@ -19,7 +19,7 @@ interface UseStockChartResult {
 }
 
 // In-memory cache shared across hook instances
-const chartCache = new Map<string, CandlePoint[]>()
+export const chartCache = new Map<string, CandlePoint[]>()
 
 /**
  * Fetches OHLCV candle data for the given ticker from /api/candles/[ticker].

@@ -102,6 +102,11 @@ function HomeContent() {
     setPage(1)
   }, [debouncedSearch])
 
+  const handlePageChange = (newPage: number | ((p: number) => number)) => {
+    setPage(newPage)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   // 3. Filter stocks in memory
   const filteredStocks = useMemo(() => {
     if (!debouncedSearch) return stocks
@@ -155,7 +160,7 @@ function HomeContent() {
       </section>
 
       {/* Controls: Search and Count */}
-      <section className="flex flex-col sm:flex-row gap-4 items-start justify-between animate-fade-up">
+      <section className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between animate-fade-up">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant pointer-events-none" />
           <input
@@ -166,67 +171,17 @@ function HomeContent() {
             className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface-card border border-border-hairline text-sm text-primary placeholder:text-on-surface-variant focus:outline-none focus:border-ring/50 focus:ring-1 focus:ring-ring/30 transition-colors"
           />
         </div>
-        <div className="flex flex-col items-start gap-2">
-          <div className="text-sm text-on-surface-variant">
-            Showing {totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
-            {Math.min(page * PAGE_SIZE, totalItems)} of {totalItems} stocks
-          </div>
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <nav className="flex items-center gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              
-              <div className="flex gap-1">
-                {Array.from({ length: totalPages }).map((_, i) => {
-                  const p = i + 1
-                  if (
-                    p === 1 || 
-                    p === totalPages || 
-                    (p >= page - 1 && p <= page + 1)
-                  ) {
-                    return (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p)}
-                        className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                          page === p
-                            ? 'bg-ring/15 text-ring border border-ring/30'
-                            : 'text-on-surface-variant hover:bg-border-active hover:text-primary'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    )
-                  } else if (p === page - 2 || p === page + 2) {
-                    return <span key={p} className="flex items-center justify-center w-9 h-9 text-sm text-on-surface-variant/50">...</span>
-                  }
-                  return null
-                })}
-              </div>
-
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </nav>
-          )}
+        <div className="text-sm text-on-surface-variant">
+          Showing {totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
+          {Math.min(page * PAGE_SIZE, totalItems)} of {totalItems} stocks
         </div>
       </section>
 
       {/* Stock Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fade-up">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-[170px] bg-surface-card border border-border-hairline rounded-lg animate-pulse" />
+        <div className="flex flex-col gap-2 animate-fade-up w-full">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="h-[90px] lg:h-[72px] bg-surface-card border border-border-hairline rounded-xl animate-pulse" />
           ))}
         </div>
       ) : error ? (
@@ -234,7 +189,17 @@ function HomeContent() {
           <p>{error}</p>
         </div>
       ) : currentStocks.length > 0 ? (
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fade-up">
+        <section className="flex flex-col gap-2 animate-fade-up w-full">
+          {/* Table Header Desktop */}
+          <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] px-4 pb-2 border-b border-border-hairline font-label-sm text-[11px] uppercase tracking-[0.1em] text-on-surface-variant/70 mb-2">
+            <div>Symbol / Name</div>
+            <div className="text-right">Price</div>
+            <div className="text-right">Change</div>
+            <div className="text-right">Day High</div>
+            <div className="text-right">Day Low</div>
+            <div className="text-right">Market Cap</div>
+          </div>
+
           {currentStocks.map((stock) => {
             const isUp = stock.changePercent > 0
             const isDown = stock.changePercent < 0
@@ -243,49 +208,73 @@ function HomeContent() {
               : isDown
               ? 'text-trend-down'
               : 'text-on-surface-variant'
-            const arrow = isUp ? '▲' : isDown ? '▼' : '—'
+            const trendBgClass = isUp
+              ? 'bg-trend-up/10 border-trend-up/20'
+              : isDown
+              ? 'bg-trend-down/10 border-trend-down/20'
+              : 'bg-surface-container-high border-border-hairline'
 
             return (
               <Link key={stock.symbol} href={`/${stock.symbol}`} className="group block">
-                <article className="bg-surface-card border border-border-hairline rounded-lg hover:border-border-active transition-colors flex flex-col h-full hover:shadow-lg hover:shadow-primary/5">
-                  <div className="p-[20px] flex justify-between items-start gap-2">
-                    <div className="min-w-0">
+                <article className="bg-surface-card rounded-xl p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 relative overflow-hidden border border-border-hairline hover:border-border-active">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+                  
+                  {/* Symbol & Name */}
+                  <div className="flex items-center gap-3 z-10">
+                    <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
                       <span className="font-label-caps text-xs tracking-widest uppercase text-primary shrink-0">
-                        {stock.symbol}
+                        {stock.symbol.slice(0, 3)}
                       </span>
-                      <p className="font-body-sm text-sm text-on-surface-variant truncate max-w-[140px] mt-1">
-                        {stock.name}
-                      </p>
                     </div>
-                    <span className={`font-data-mono text-sm shrink-0 ${trendColorClass}`}>
-                      {arrow} {stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
-                    </span>
+                    <div className="min-w-0">
+                      <h3 className="font-label-md text-sm text-on-surface font-bold tracking-wider truncate">{stock.symbol}</h3>
+                      <p className="font-caption text-xs text-on-surface-variant line-clamp-1">{stock.name}</p>
+                    </div>
                   </div>
 
-                  <div className="px-[20px] pb-[20px] flex-grow">
-                    <span className="font-data-mono text-[24px] font-bold text-primary tracking-tight">
-                      ${stock.price?.toFixed(2) ?? 'N/A'}
-                    </span>
+                  {/* Mobile Price & Change */}
+                  <div className="flex justify-between items-center lg:hidden z-10">
+                    <div>
+                      <div className="font-headline-md text-lg font-bold text-on-surface">${stock.price?.toFixed(2) ?? 'N/A'}</div>
+                    </div>
+                    <div className={`${trendBgClass} border rounded-full px-2 py-1 flex items-center gap-1`}>
+                      <span className={`font-caption text-xs font-semibold ${trendColorClass}`}>
+                        {stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="border-t border-border-hairline p-[20px] flex justify-between items-center bg-surface-container-lowest/50">
-                    <div className="flex flex-col">
-                      <span className="font-label-caps text-[10px] tracking-wider uppercase text-on-surface-variant">
-                        MKT CAP
-                      </span>
-                      <span className="font-data-mono text-sm text-primary mt-1">
-                        {formatCompact(stock.marketCap)}
-                      </span>
-                    </div>
-                    <div className="flex flex-col text-right">
-                      <span className="font-label-caps text-[10px] tracking-wider uppercase text-on-surface-variant">
-                        VOL
-                      </span>
-                      <span className="font-data-mono text-sm text-primary mt-1">
-                        {formatCompact(stock.volume)}
+                  {/* Desktop Price */}
+                  <div className="hidden lg:block text-right z-10">
+                    <div className="font-label-md text-sm text-on-surface font-bold">${stock.price?.toFixed(2) ?? 'N/A'}</div>
+                  </div>
+                  
+                  {/* Desktop Change */}
+                  <div className="hidden lg:flex justify-end z-10">
+                    <div className={`${trendBgClass} border rounded-full px-2 py-1 flex items-center gap-1`}>
+                      <span className={`font-caption text-xs font-semibold ${trendColorClass}`}>
+                        {stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                       </span>
                     </div>
                   </div>
+
+                  {/* OHL (High/Low/Market Cap) Mobile/Desktop */}
+                  <div className="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-border-hairline lg:border-t-0 mt-2 lg:mt-0">
+                    <div className="flex flex-col lg:text-right">
+                      <span className="font-caption text-[10px] uppercase tracking-wider text-on-surface-variant/70 lg:hidden">High</span>
+                      <span className="font-label-md text-sm text-on-surface-variant">${stock.dayHigh?.toFixed(2) ?? 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col lg:text-right">
+                      <span className="font-caption text-[10px] uppercase tracking-wider text-on-surface-variant/70 lg:hidden">Low</span>
+                      <span className="font-label-md text-sm text-on-surface-variant">${stock.dayLow?.toFixed(2) ?? 'N/A'}</span>
+                    </div>
+                    <div className="flex flex-col lg:text-right">
+                      <span className="font-caption text-[10px] uppercase tracking-wider text-on-surface-variant/70 lg:hidden">Mkt Cap</span>
+                      <span className="font-label-md text-sm text-on-surface-variant">{formatCompact(stock.marketCap)}</span>
+                    </div>
+                  </div>
+
+                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
                 </article>
               </Link>
             )
@@ -297,7 +286,55 @@ function HomeContent() {
         </div>
       )}
 
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <nav className="flex items-center justify-center gap-2 mt-4 animate-fade-up">
+          <button
+            onClick={() => handlePageChange(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          
+          <div className="flex gap-1">
+            {Array.from({ length: totalPages }).map((_, i) => {
+              const p = i + 1
+              // Simple pagination logic for demo
+              if (
+                p === 1 || 
+                p === totalPages || 
+                (p >= page - 1 && p <= page + 1)
+              ) {
+                return (
+                  <button
+                    key={p}
+                    onClick={() => handlePageChange(p)}
+                    className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                      page === p
+                        ? 'bg-ring/15 text-ring border border-ring/30'
+                        : 'text-on-surface-variant hover:bg-border-active hover:text-primary'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                )
+              } else if (p === page - 2 || p === page + 2) {
+                return <span key={p} className="flex items-center justify-center w-9 h-9 text-sm text-on-surface-variant/50">...</span>
+              }
+              return null
+            })}
+          </div>
 
+          <button
+            onClick={() => handlePageChange(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </nav>
+      )}
     </div>
   )
 }

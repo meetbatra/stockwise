@@ -2,20 +2,13 @@
 
 import { useEffect, useMemo, useState, Suspense } from 'react'
 import Link from 'next/link'
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useQueryState, parseAsString } from 'nuqs'
 import { useDebounce } from '@/hooks/use-debounce'
+import { Input } from '@/components/ui/input'
+import { ScreenerFilter, SCREENERS } from '@/components/ScreenerFilter'
+import { StockPagination } from '@/components/StockPagination'
+import { LoadingRows } from './loading'
 import type { StockData } from '@/lib/yahoo-fetch'
-
-const SCREENERS = [
-  { id: 'most_actives', label: 'Most Actives' },
-  { id: 'day_gainers', label: 'Day Gainers' },
-  { id: 'day_losers', label: 'Day Losers' },
-  { id: 'undervalued_large_caps', label: 'Value (Large)' },
-  { id: 'growth_technology_stocks', label: 'Tech Growth' },
-  { id: 'undervalued_growth_stocks', label: 'Value Growth' },
-  { id: 'small_cap_gainers', label: 'Small Cap Gainers' },
-]
 
 const PAGE_SIZE = 10
 
@@ -32,7 +25,7 @@ export default function HomePage() {
     <Suspense fallback={
       <div className="flex-grow pt-24 pb-12 px-4 sm:px-6 md:px-8 max-w-[1400px] mx-auto w-full flex justify-center">
         <div className="animate-pulse flex space-x-4">
-          <div className="h-4 w-24 bg-surface-card rounded"></div>
+          <div className="h-4 w-24 bg-surface-card rounded" />
         </div>
       </div>
     }>
@@ -54,19 +47,16 @@ function HomeContent() {
   const debouncedSearch = useDebounce(search, 300)
   const [page, setPage] = useState(1)
 
-  // 1. Fetch on mount and on screener change
+  // Fetch on mount and on screener change
   useEffect(() => {
     let active = true
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null)
 
     fetch(`/api/stocks/top50?screener=${screener}&size=50`)
       .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to fetch: ${res.statusText}`)
-        }
+        if (!res.ok) throw new Error(`Failed to fetch: ${res.statusText}`)
         return res.json()
       })
       .then((data) => {
@@ -83,16 +73,13 @@ function HomeContent() {
         }
       })
 
-    return () => {
-      active = false
-    }
+    return () => { active = false }
   }, [screener])
 
-  // 2. Reset search and page on screener change
+  // Reset search and page on screener change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearch('')
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
   }, [screener])
 
@@ -102,33 +89,31 @@ function HomeContent() {
     setPage(1)
   }, [debouncedSearch])
 
-  const handlePageChange = (newPage: number | ((p: number) => number)) => {
+  const handlePageChange = (newPage: number) => {
     setPage(newPage)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100)
   }
 
-  // 3. Filter stocks in memory
+  const handleScreenerChange = (id: string) => {
+    setScreener(id)
+  }
+
+  // Filter stocks in memory
   const filteredStocks = useMemo(() => {
     if (!debouncedSearch) return stocks
-    const lowerSearch = debouncedSearch.toLowerCase()
+    const q = debouncedSearch.toLowerCase()
     return stocks.filter(
-      (s) =>
-        s.symbol.toLowerCase().includes(lowerSearch) ||
-        s.name.toLowerCase().includes(lowerSearch)
+      (s) => s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
     )
   }, [stocks, debouncedSearch])
 
-  // 4. Paginate filtered stocks
+  // Paginate filtered stocks
   const totalItems = filteredStocks.length
   const totalPages = Math.ceil(totalItems / PAGE_SIZE)
   const currentStocks = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE
     return filteredStocks.slice(start, start + PAGE_SIZE)
   }, [filteredStocks, page])
-
-  const handleScreenerChange = (id: string) => {
-    setScreener(id)
-  }
 
   return (
     <div className="flex-grow pt-24 pb-12 px-4 sm:px-6 md:px-8 max-w-[1400px] mx-auto w-full flex flex-col gap-8">
@@ -142,55 +127,46 @@ function HomeContent() {
         </p>
       </section>
 
-      {/* Screener Selector */}
-      <section className="flex gap-2 overflow-x-auto pb-2 scrollbar-none animate-fade-up">
-        {SCREENERS.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => handleScreenerChange(s.id)}
-            className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors border border-border-hairline ${screener === s.id
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-surface-card text-on-surface-variant hover:text-primary hover:border-border-active'
-              }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </section>
+      {/* Screener Filter */}
+      <ScreenerFilter activeScreener={screener} onScreenerChange={handleScreenerChange} />
 
-      {/* Controls: Search and Count */}
+      {/* Search + Count */}
       <section className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between animate-fade-up">
         <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant pointer-events-none" />
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             disabled={loading}
             placeholder="Search symbol or name..."
-            className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface-card border border-border-hairline text-sm text-primary placeholder:text-on-surface-variant focus:outline-none focus:border-ring/50 focus:ring-1 focus:ring-ring/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="pl-9 h-10 bg-surface-card border-border-hairline text-primary placeholder:text-on-surface-variant focus:border-ring/50 focus:ring-ring/30 disabled:opacity-50"
           />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant pointer-events-none"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
         </div>
         <div className="text-sm text-on-surface-variant">
-          Showing {totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
+          Showing {totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–
           {Math.min(page * PAGE_SIZE, totalItems)} of {totalItems} stocks
         </div>
       </section>
 
-      {/* Stock Grid */}
+      {/* Stock List */}
       {loading ? (
-        <div className="flex flex-col gap-2 animate-fade-up w-full">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="h-[90px] lg:h-[72px] bg-white/10 border border-white/5 rounded-xl animate-pulse" />
-          ))}
-        </div>
+        <LoadingRows />
       ) : error ? (
         <div className="py-12 text-center text-trend-down bg-surface-card border border-border-hairline rounded-lg">
           <p>{error}</p>
         </div>
       ) : currentStocks.length > 0 ? (
         <section className="flex flex-col gap-2 animate-fade-up w-full">
-          {/* Table Header Desktop */}
+          {/* Table Header — desktop only */}
           <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] px-4 pb-2 border-b border-border-hairline font-label-sm text-[11px] uppercase tracking-[0.1em] text-on-surface-variant/70 mb-2">
             <div>Symbol / Name</div>
             <div className="text-right">Price</div>
@@ -203,11 +179,7 @@ function HomeContent() {
           {currentStocks.map((stock) => {
             const isUp = stock.changePercent > 0
             const isDown = stock.changePercent < 0
-            const trendColorClass = isUp
-              ? 'text-trend-up'
-              : isDown
-                ? 'text-trend-down'
-                : 'text-on-surface-variant'
+            const trendColorClass = isUp ? 'text-trend-up' : isDown ? 'text-trend-down' : 'text-on-surface-variant'
             const trendBgClass = isUp
               ? 'bg-trend-up/10 border-trend-up/20'
               : isDown
@@ -217,7 +189,7 @@ function HomeContent() {
             return (
               <Link key={stock.symbol} href={`/${stock.symbol}`} className="group block">
                 <article className="bg-surface-card rounded-xl p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center cursor-pointer transition-all duration-300 relative overflow-hidden border border-border-hairline hover:border-border-active">
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none" />
 
                   {/* Symbol & Name */}
                   <div className="flex items-center gap-3 z-10">
@@ -232,10 +204,10 @@ function HomeContent() {
                     </div>
                   </div>
 
-                  {/* Mobile Price & Change */}
+                  {/* Mobile: Price & Change */}
                   <div className="flex justify-between items-center lg:hidden z-10">
-                    <div>
-                      <div className="font-headline-md text-lg font-bold text-on-surface">${stock.price?.toFixed(2) ?? 'N/A'}</div>
+                    <div className="font-headline-md text-lg font-bold text-on-surface">
+                      ${stock.price?.toFixed(2) ?? 'N/A'}
                     </div>
                     <div className={`${trendBgClass} border rounded-full px-2 py-1 flex items-center gap-1`}>
                       <span className={`font-caption text-xs font-semibold ${trendColorClass}`}>
@@ -244,12 +216,14 @@ function HomeContent() {
                     </div>
                   </div>
 
-                  {/* Desktop Price */}
+                  {/* Desktop: Price */}
                   <div className="hidden lg:block text-right z-10">
-                    <div className="font-label-md text-sm text-on-surface font-bold">${stock.price?.toFixed(2) ?? 'N/A'}</div>
+                    <div className="font-label-md text-sm text-on-surface font-bold">
+                      ${stock.price?.toFixed(2) ?? 'N/A'}
+                    </div>
                   </div>
 
-                  {/* Desktop Change */}
+                  {/* Desktop: Change */}
                   <div className="hidden lg:flex justify-end z-10">
                     <div className={`${trendBgClass} border rounded-full px-2 py-1 flex items-center gap-1`}>
                       <span className={`font-caption text-xs font-semibold ${trendColorClass}`}>
@@ -258,7 +232,7 @@ function HomeContent() {
                     </div>
                   </div>
 
-                  {/* OHL (High/Low/Market Cap) Mobile/Desktop */}
+                  {/* High / Low / Market Cap */}
                   <div className="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-border-hairline lg:border-t-0 mt-2 lg:mt-0">
                     <div className="flex flex-col lg:text-right">
                       <span className="font-caption text-[10px] uppercase tracking-wider text-on-surface-variant/70 lg:hidden">High</span>
@@ -274,7 +248,7 @@ function HomeContent() {
                     </div>
                   </div>
 
-                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none" />
                 </article>
               </Link>
             )
@@ -286,55 +260,13 @@ function HomeContent() {
         </div>
       )}
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <nav className="flex items-center justify-center gap-2 mt-4 animate-fade-up">
-          <button
-            onClick={() => handlePageChange(p => Math.max(1, p - 1))}
-            disabled={page === 1 || loading}
-            className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-
-          <div className="flex gap-1">
-            {Array.from({ length: totalPages }).map((_, i) => {
-              const p = i + 1
-              // Simple pagination logic for demo
-              if (
-                p === 1 ||
-                p === totalPages ||
-                (p >= page - 1 && p <= page + 1)
-              ) {
-                return (
-                  <button
-                    key={p}
-                    onClick={() => handlePageChange(p)}
-                    disabled={loading}
-                    className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${page === p
-                        ? 'bg-ring/15 text-ring border border-ring/30'
-                        : 'text-on-surface-variant hover:bg-border-active hover:text-primary'
-                      }`}
-                  >
-                    {p}
-                  </button>
-                )
-              } else if (p === page - 2 || p === page + 2) {
-                return <span key={p} className="flex items-center justify-center w-9 h-9 text-sm text-on-surface-variant/50">...</span>
-              }
-              return null
-            })}
-          </div>
-
-          <button
-            onClick={() => handlePageChange(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages || loading}
-            className="flex items-center justify-center w-9 h-9 rounded-lg text-sm text-on-surface-variant hover:bg-border-active hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </nav>
-      )}
+      {/* Pagination */}
+      <StockPagination
+        page={page}
+        totalPages={totalPages}
+        loading={loading}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 }

@@ -21,10 +21,12 @@ function fmtVolume(n: number): string {
   return String(n)
 }
 
+import { Card, CardContent } from '@/components/ui/card'
+
 export function StatsGrid({ meta }: StatsGridProps) {
   const stats = [
     {
-      label: 'Open',
+      label: 'Last Price',
       value: `$${fmt(meta.price)}`,
       icon: DollarSign,
     },
@@ -72,11 +74,11 @@ export function StatsGrid({ meta }: StatsGridProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
       {stats.map(({ label, value, icon: Icon, positive, negative }) => (
-        <div
+        <Card
           key={label}
-          className="rounded-xl border border-hairline bg-black/20 p-4 transition-colors hover:bg-black/40"
+          className="rounded-xl border-hairline bg-black/20 transition-colors hover:bg-black/40"
         >
-          <div className="space-y-1.5">
+          <CardContent className="p-4 space-y-1.5">
             <div className="flex items-center gap-1.5 text-slate-400">
               <Icon className="h-3.5 w-3.5" />
               <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
@@ -92,9 +94,10 @@ export function StatsGrid({ meta }: StatsGridProps) {
             >
               {value}
             </p>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   )
 }
+

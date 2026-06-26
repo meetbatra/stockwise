@@ -1,17 +1,16 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   AreaChart,
   Area,
   XAxis,
   YAxis,
   CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
 } from 'recharts'
 import { useStockChart, chartCache } from '@/hooks/useStockChart'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ChartContainer, ChartTooltip } from '@/components/ui/chart'
 import type { CandlePoint } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -77,11 +76,13 @@ export function StockChart({ ticker, initialCandles, initialWeeklyCandles }: Sto
     if (maxAvailableDays !== Infinity && !isRangeValid(rangeIdx)) {
       for (let i = RANGES.length - 1; i >= 0; i--) {
         if (isRangeValid(i)) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setRangeIdx(i)
           break
         }
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxAvailableDays, rangeIdx])
 
   // Determine chart colour based on first vs last close
@@ -146,93 +147,99 @@ export function StockChart({ ticker, initialCandles, initialWeeklyCandles }: Sto
           {error ?? 'No chart data available for this range.'}
         </div>
       ) : (
-        <div className="h-60 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={formatted}
-              margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
-            >
-              <defs>
-                <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={strokeColor} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
+        <ChartContainer
+          config={{
+            close: {
+              label: 'Price',
+              color: strokeColor,
+            },
+          }}
+          className="h-60 w-full"
+        >
+          <AreaChart
+            data={formatted}
+            margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-close)" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="var(--color-close)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
 
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="oklch(1 0 0 / 6%)"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="time"
-                tickFormatter={(val: number) => {
-                  const d = new Date(val * 1000)
-                  if (range.interval === '60m') {
-                    return d.toLocaleDateString('en-US', {
-                      weekday: 'short',
-                      hour: 'numeric',
-                    })
-                  }
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="oklch(1 0 0 / 6%)"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="time"
+              tickFormatter={(val: number) => {
+                const d = new Date(val * 1000)
+                if (range.interval === '60m') {
                   return d.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    ...(range.days > 180 ? { year: '2-digit' } : {}),
+                    weekday: 'short',
+                    hour: 'numeric',
                   })
-                }}
-                tick={{ fontSize: 10, fill: 'oklch(0.56 0 0)' }}
-                tickLine={false}
-                axisLine={false}
-                interval="preserveStartEnd"
-                minTickGap={40}
-              />
-              <YAxis
-                domain={['auto', 'auto']}
-                tick={{ fontSize: 10, fill: 'oklch(0.56 0 0)' }}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(v: number) => `$${v.toFixed(0)}`}
-                width={52}
-              />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null
-                  const entry = payload[0]
-                  if (!entry) return null
-                  const d = entry.payload as {
-                    time: number
-                    fullDate: string
-                    close: number
-                    volume: number
-                  }
-                  return (
-                    <div className="rounded-lg border border-border/60 bg-popover px-3 py-2 shadow-xl text-xs space-y-1">
-                      <p className="font-medium text-foreground">{d.fullDate}</p>
-                      <p
-                        className="tabular-nums"
-                        style={{ color: strokeColor }}
-                      >
-                        Close: ${d.close.toFixed(2)}
-                      </p>
-                      <p className="text-muted-foreground tabular-nums">
-                        Vol: {(d.volume / 1_000_000).toFixed(2)}M
-                      </p>
-                    </div>
-                  )
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="close"
-                stroke={strokeColor}
-                strokeWidth={1.5}
-                fill={`url(#${fillId})`}
-                dot={false}
-                activeDot={{ r: 4, fill: strokeColor, strokeWidth: 0 }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+                }
+                return d.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  ...(range.days > 180 ? { year: '2-digit' } : {}),
+                })
+              }}
+              tick={{ fontSize: 10, fill: 'oklch(0.56 0 0)' }}
+              tickLine={false}
+              axisLine={false}
+              interval="equidistantPreserveStart"
+              minTickGap={40}
+            />
+            <YAxis
+              domain={['auto', 'auto']}
+              tick={{ fontSize: 10, fill: 'oklch(0.56 0 0)' }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(v: number) => `$${v.toFixed(0)}`}
+              width={52}
+            />
+            <ChartTooltip
+              content={({ active, payload }) => {
+                if (!active || !payload?.length) return null
+                const entry = payload[0]
+                if (!entry) return null
+                const d = entry.payload as {
+                  time: number
+                  fullDate: string
+                  close: number
+                  volume: number
+                }
+                return (
+                  <div className="rounded-lg border border-border/60 bg-popover px-3 py-2 shadow-xl text-xs space-y-1">
+                    <p className="font-medium text-foreground">{d.fullDate}</p>
+                    <p
+                      className="tabular-nums"
+                      style={{ color: strokeColor }}
+                    >
+                      Close: ${d.close.toFixed(2)}
+                    </p>
+                    <p className="text-muted-foreground tabular-nums">
+                      Vol: {(d.volume / 1_000_000).toFixed(2)}M
+                    </p>
+                  </div>
+                )
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="close"
+              stroke="var(--color-close)"
+              strokeWidth={1.5}
+              fill={`url(#${fillId})`}
+              dot={false}
+              activeDot={{ r: 4, fill: "var(--color-close)", strokeWidth: 0 }}
+            />
+          </AreaChart>
+        </ChartContainer>
       )}
     </div>
   )

@@ -20,48 +20,51 @@ function timeAgo(unixSeconds: number): string {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
+import { Card, CardContent } from '@/components/ui/card'
+
 export function NewsPanel({ ticker, hasApiKey = true, initialNews }: NewsPanelProps) {
   const { news, isLoading, error } = useStockNews(ticker, 8, initialNews)
 
   return (
-    <div className="space-y-4 animate-fade-up">
-      <div className="flex items-center gap-2">
-        <Newspaper className="h-4 w-4 text-slate-400" />
-        <h2 className="text-sm font-medium tracking-wide text-slate-200">Latest News</h2>
-        <Badge variant="outline" className="text-[10px] ml-auto border-hairline bg-black/20 text-slate-400">
-          Last 7 days
-        </Badge>
-      </div>
+    <Card className="border-hairline bg-black/20">
+      <CardContent className="p-4 space-y-4 animate-fade-up">
+        <div className="flex items-center gap-2">
+          <Newspaper className="h-4 w-4 text-slate-400" />
+          <h2 className="text-sm font-medium tracking-wide text-slate-200">Latest News</h2>
+          <Badge variant="outline" className="text-[10px] ml-auto border-hairline bg-black/20 text-slate-400">
+            Last 7 days
+          </Badge>
+        </div>
 
-      {isLoading ? (
-        <div className="space-y-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="flex gap-4 items-start">
-              <Skeleton className="h-14 w-20 shrink-0 rounded-lg bg-slate-800/50" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-full bg-slate-800/50" />
-                <Skeleton className="h-4 w-4/5 bg-slate-800/50" />
-                <div className="flex items-center gap-2 pt-1">
-                  <Skeleton className="h-3 w-16 bg-slate-800/50" />
-                  <Skeleton className="h-3 w-12 bg-slate-800/50" />
+        {isLoading ? (
+          <div className="space-y-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex gap-4 items-start">
+                <Skeleton className="h-14 w-20 shrink-0 rounded-lg bg-slate-800/50" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-full bg-slate-800/50" />
+                  <Skeleton className="h-4 w-4/5 bg-slate-800/50" />
+                  <div className="flex items-center gap-2 pt-1">
+                    <Skeleton className="h-3 w-16 bg-slate-800/50" />
+                    <Skeleton className="h-3 w-12 bg-slate-800/50" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : error ? (
-        <p className="text-sm text-slate-400">{error}</p>
-      ) : !news.length ? (
-        <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <KeyRound className="h-8 w-8 text-slate-600" />
-          <p className="text-sm text-slate-400 max-w-[200px]">
-            {!hasApiKey
-              ? 'News unavailable — configure FINNHUB_API_KEY to enable.'
-              : `No recent news found for ${ticker}.`}
-          </p>
-        </div>
-      ) : (
-        <ul className="space-y-0 divide-y divide-white/5">
+            ))}
+          </div>
+        ) : error ? (
+          <p className="text-sm text-slate-400">{error}</p>
+        ) : !news.length ? (
+          <div className="flex flex-col items-center gap-3 py-8 text-center">
+            <KeyRound className="h-8 w-8 text-slate-600" />
+            <p className="text-sm text-slate-400 max-w-[200px]">
+              {!hasApiKey
+                ? 'News unavailable — configure FINNHUB_API_KEY to enable.'
+                : `No recent news found for ${ticker}.`}
+            </p>
+          </div>
+        ) : (
+          <ul className="space-y-0 divide-y divide-white/5">
           {news.map((article) => (
             <li key={article.id} className="py-4 first:pt-0 last:pb-0 group">
               <a
@@ -104,6 +107,7 @@ export function NewsPanel({ ticker, hasApiKey = true, initialNews }: NewsPanelPr
           ))}
         </ul>
       )}
-    </div>
+      </CardContent>
+    </Card>
   )
 }

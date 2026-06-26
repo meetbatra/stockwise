@@ -1,4 +1,4 @@
-import ky, { HTTPError } from 'ky'
+import ky from 'ky'
 import type { NewsArticle } from '@/lib/types'
 
 const finnhub = ky.create({
@@ -40,5 +40,3 @@ export async function fetchNews(ticker: string): Promise<NewsArticle[]> {
     return []
   }
 }
-
-export { finnhub, HTTPError }

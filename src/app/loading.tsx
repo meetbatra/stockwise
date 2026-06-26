@@ -1,50 +1,47 @@
-import { Skeleton } from '@/components/ui/skeleton'
+/**
+ * Shared loading skeleton for the home page.
+ *
+ * `LoadingRows` — the 10 pulsing list rows, used by HomeContent for the
+ *   client-side loading state while data is being fetched.
+ *
+ * Default export — full-page wrapper used automatically by Next.js as the
+ *   Suspense boundary for any Server Component route that wraps this segment.
+ */
+
+export function LoadingRows() {
+  return (
+    <div className="flex flex-col gap-2 animate-fade-up w-full">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <div
+          key={i}
+          className="h-[90px] lg:h-[72px] bg-white/10 border border-white/5 rounded-xl animate-pulse"
+        />
+      ))}
+    </div>
+  )
+}
 
 export default function HomeLoading() {
   return (
     <div className="flex-grow pt-24 pb-12 px-4 sm:px-6 md:px-8 max-w-[1400px] mx-auto w-full flex flex-col gap-8">
-      {/* Header skeleton */}
+      {/* Header */}
       <div className="flex flex-col gap-2">
-        <Skeleton className="h-10 w-48 bg-border-active" />
-        <Skeleton className="h-4 w-64 bg-border-active" />
+        <div className="h-9 w-48 bg-white/10 rounded animate-pulse" />
+        <div className="h-4 w-64 bg-white/10 rounded animate-pulse" />
       </div>
 
-      {/* Filters skeleton */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Skeleton className="h-9 w-full sm:max-w-sm bg-border-active rounded-lg" />
-        <Skeleton className="h-9 w-full sm:w-[180px] bg-border-active rounded-lg" />
-      </div>
-
-      {/* Grid skeleton — 10 cards matching PAGE_SIZE */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <article
-            key={i}
-            className="bg-surface-card border border-border-hairline rounded-lg flex flex-col h-[170px]"
-          >
-            <div className="p-[20px] flex justify-between items-start">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-12 bg-border-active" />
-                <Skeleton className="h-3 w-24 bg-border-active" />
-              </div>
-              <Skeleton className="h-4 w-16 bg-border-active" />
-            </div>
-            <div className="px-[20px] pb-[20px] flex-grow">
-              <Skeleton className="h-8 w-20 bg-border-active" />
-            </div>
-            <div className="border-t border-border-hairline p-[20px] flex justify-between items-center bg-surface-container-lowest/50">
-              <div className="space-y-1">
-                <Skeleton className="h-2 w-8 bg-border-active" />
-                <Skeleton className="h-4 w-12 bg-border-active" />
-              </div>
-              <div className="space-y-1 items-end flex flex-col">
-                <Skeleton className="h-2 w-8 bg-border-active" />
-                <Skeleton className="h-4 w-12 bg-border-active" />
-              </div>
-            </div>
-          </article>
+      {/* Screener pills */}
+      <div className="flex gap-2">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} className="h-9 w-28 bg-white/10 rounded-full animate-pulse" />
         ))}
       </div>
+
+      {/* Search row */}
+      <div className="h-10 w-full sm:max-w-xs bg-white/10 rounded-lg animate-pulse" />
+
+      {/* List rows */}
+      <LoadingRows />
     </div>
   )
 }

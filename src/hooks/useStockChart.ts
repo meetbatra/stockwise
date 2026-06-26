@@ -77,6 +77,7 @@ export function useStockChart(
 
     if (chartCache.has(cacheKey)) {
       filterAndSet(chartCache.get(cacheKey)!)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false)
       setError(null)
       return

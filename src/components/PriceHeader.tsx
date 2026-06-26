@@ -6,13 +6,17 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useQuote } from '@/hooks/useQuote'
 import { cn } from '@/lib/utils'
 
+import type { FullStockData } from '@/lib/yahoo-fetch'
+
 interface PriceHeaderProps {
   ticker: string
+  initialQuote?: FullStockData | undefined
 }
 
-export function PriceHeader({ ticker }: PriceHeaderProps) {
+export function PriceHeader({ ticker, initialQuote }: PriceHeaderProps) {
   const { quote, isLoading, error, refresh } = useQuote(ticker, {
     refreshInterval: 15_000,
+    initialData: initialQuote,
   })
 
   if (isLoading) return <PriceHeaderSkeleton />
@@ -31,10 +35,9 @@ export function PriceHeader({ ticker }: PriceHeaderProps) {
     )
   }
 
-  const price = quote.regularMarketPrice
-  const prevClose = quote.chartPreviousClose
-  const change = price - prevClose
-  const changePct = prevClose !== 0 ? (change / prevClose) * 100 : 0
+  const price = quote.price
+  const change = quote.change
+  const changePct = quote.changePercent
   const isUp = change > 0
   const isDown = change < 0
   const TrendIcon = isUp ? TrendingUp : isDown ? TrendingDown : Minus
@@ -45,12 +48,12 @@ export function PriceHeader({ ticker }: PriceHeaderProps) {
       <div className="flex items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">
-            {quote.longName || ticker}
+            {quote.longName || quote.name || ticker}
           </h1>
           <p className="text-sm font-medium text-slate-400 tracking-wide uppercase mt-1">
             {ticker} <span className="mx-1.5 opacity-50">·</span>{' '}
-            {quote.exchangeName} <span className="mx-1.5 opacity-50">·</span>{' '}
-            {quote.currency}
+            {quote.exchange || 'N/A'} <span className="mx-1.5 opacity-50">·</span>{' '}
+            {quote.currency || 'USD'}
           </p>
         </div>
       </div>
@@ -80,7 +83,7 @@ export function PriceHeader({ ticker }: PriceHeaderProps) {
 
         <span className="text-sm font-mono text-slate-400 self-end pb-1">
           Prev Close:{' '}
-          <span className="text-slate-200">${prevClose.toFixed(2)}</span>
+          <span className="text-slate-200">${(price - change).toFixed(2)}</span>
         </span>
 
         {/* Live indicator */}

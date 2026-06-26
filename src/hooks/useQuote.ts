@@ -1,17 +1,19 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { YahooMeta } from '@/lib/types'
+import type { FullStockData } from '@/lib/yahoo-fetch'
 
 interface UseQuoteOptions {
   /** Poll interval in milliseconds. Default: 15 000 ms */
   refreshInterval?: number
   /** Whether to start polling immediately. Default: true */
   enabled?: boolean
+  /** Initial quote data to bypass the first loading skeleton */
+  initialData?: FullStockData | undefined
 }
 
 interface UseQuoteResult {
-  quote: YahooMeta | null
+  quote: FullStockData | null
   isLoading: boolean
   error: string | null
   /** Manually trigger a refresh */
@@ -24,10 +26,10 @@ interface UseQuoteResult {
  */
 export function useQuote(
   ticker: string,
-  { refreshInterval = 15_000, enabled = true }: UseQuoteOptions = {},
+  { refreshInterval = 15_000, enabled = true, initialData }: UseQuoteOptions = {},
 ): UseQuoteResult {
-  const [quote, setQuote] = useState<YahooMeta | null>(null)
-  const [isLoading, setIsLoading] = useState(enabled)
+  const [quote, setQuote] = useState<FullStockData | null>(initialData ?? null)
+  const [isLoading, setIsLoading] = useState(!initialData && enabled)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -49,7 +51,7 @@ export function useQuote(
         throw new Error(json?.error ?? `HTTP ${res.status}`)
       }
 
-      const data: YahooMeta = await res.json()
+      const data: FullStockData = await res.json()
       setQuote(data)
       setError(null)
     } catch (err) {

@@ -16,9 +16,10 @@ interface UseStockNewsResult {
 export function useStockNews(
   ticker: string,
   limit = 10,
+  initialData?: NewsArticle[] | undefined,
 ): UseStockNewsResult {
-  const [news, setNews] = useState<NewsArticle[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [news, setNews] = useState<NewsArticle[]>(initialData || [])
+  const [isLoading, setIsLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {

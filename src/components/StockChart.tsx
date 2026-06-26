@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   AreaChart,
   Area,
@@ -12,6 +12,7 @@ import {
 } from 'recharts'
 import { useStockChart } from '@/hooks/useStockChart'
 import { Skeleton } from '@/components/ui/skeleton'
+import type { CandlePoint } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 interface Range {
@@ -30,24 +31,49 @@ const RANGES: Range[] = [
 
 interface StockChartProps {
   ticker: string
+  initialCandles?: CandlePoint[] | undefined
 }
 
-export function StockChart({ ticker }: StockChartProps) {
+export function StockChart({ ticker, initialCandles }: StockChartProps) {
   const [rangeIdx, setRangeIdx] = useState(2) // default 3M
   const range = RANGES[rangeIdx]!
 
   // Stable mount-time snapshot used to calculate "from" for chart requests
   const [mountTime] = useState(() => Math.floor(Date.now() / 1000))
 
-  const fromUnix = useMemo(
-    () => mountTime - range.days * 86_400,
-    [mountTime, range.days],
+  const { candles, isLoading, error, firstAvailableTimestamp } = useStockChart(
+    ticker,
+    {
+      interval: range.interval,
+      from: mountTime - range.days * 86_400,
+      initialData: rangeIdx === 2 ? initialCandles : undefined, // Only use initial data for the default 3M (1d) range
+    },
   )
 
-  const { candles, isLoading, error } = useStockChart(ticker, {
-    interval: range.interval,
-    from: fromUnix,
-  })
+  // Calculate max available days to disable invalid ranges for new stocks/IPOs
+  const maxAvailableDays = firstAvailableTimestamp
+    ? Math.floor((mountTime - firstAvailableTimestamp) / 86400)
+    : Infinity
+
+  // Helper to check if a range is valid. 
+  // It is valid if we have more data than the PREVIOUS range's days (with an 80% multiplier for weekends)
+  const isRangeValid = (idx: number) => {
+    if (idx === 0 || maxAvailableDays === Infinity) return true
+    const prevRangeDays = RANGES[idx - 1]!.days
+    return maxAvailableDays > prevRangeDays * 0.8
+  }
+
+  // Automatically adjust the default selection if the stock's data is shorter than the default
+  useEffect(() => {
+    if (maxAvailableDays !== Infinity && !isRangeValid(rangeIdx)) {
+      for (let i = RANGES.length - 1; i >= 0; i--) {
+        if (isRangeValid(i)) {
+          setRangeIdx(i)
+          break
+        }
+      }
+    }
+  }, [maxAvailableDays, rangeIdx])
 
   // Determine chart colour based on first vs last close
   const first = candles[0]
@@ -76,20 +102,28 @@ export function StockChart({ ticker }: StockChartProps) {
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-muted-foreground">Price Chart</p>
         <div className="flex gap-1">
-          {RANGES.map((r, i) => (
-            <button
-              key={r.label}
-              onClick={() => setRangeIdx(i)}
-              className={cn(
-                'rounded px-2.5 py-1 text-xs font-medium transition-colors',
-                i === rangeIdx
-                  ? 'bg-emerald-500/15 text-emerald-400'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent',
-              )}
-            >
-              {r.label}
-            </button>
-          ))}
+          {RANGES.map((r, i) => {
+            const isDisabled = !isRangeValid(i)
+
+            return (
+              <button
+                key={r.label}
+                onClick={() => setRangeIdx(i)}
+                disabled={isDisabled}
+                className={cn(
+                  'rounded px-2.5 py-1 text-xs font-medium transition-colors',
+                  i === rangeIdx
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : isDisabled
+                    ? 'text-muted-foreground/30 cursor-not-allowed'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+                )}
+                title={isDisabled ? 'Not enough historical data' : undefined}
+              >
+                {r.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 

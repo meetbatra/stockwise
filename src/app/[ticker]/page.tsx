@@ -1,12 +1,11 @@
 import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { fetchQuote } from '@/lib/yahoo-fetch'
+import { fetchQuote, fetchCandles } from '@/lib/yahoo-fetch'
+import { fetchNews } from '@/lib/finnhub'
 import { PriceHeader } from '@/components/PriceHeader'
 import { StockChart } from '@/components/StockChart'
 import { StatsGrid } from '@/components/StatsGrid'
 import { NewsPanel } from '@/components/NewsPanel'
-import { fetchCandles } from '@/lib/yahoo-fetch'
-import { fetchNews } from '@/lib/finnhub'
 
 type Props = {
   params: Promise<{ ticker: string }>

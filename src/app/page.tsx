@@ -1,9 +1,10 @@
-import { Suspense } from 'react'
 import { type Metadata } from 'next'
-import Link from 'next/link'
-import { fetchChartMeta } from '@/lib/yahoo'
+import { createLoader, parseAsInteger, parseAsString } from 'nuqs/server'
 import { SUPPORTED_TICKERS } from '@/lib/tickers'
-import { Skeleton } from '@/components/ui/skeleton'
+import { fetchPageStocks, getPaginatedTickers, getTotalPages, PAGE_SIZE } from '@/lib/stocks'
+import { StockCard } from '@/components/StockCard'
+import { Pagination } from '@/components/Pagination'
+import { HomeFilters } from '@/components/HomeFilters'
 
 export const metadata: Metadata = {
   title: 'Stockwise — Stock Analytics Dashboard',
@@ -11,121 +12,69 @@ export const metadata: Metadata = {
     'Real-time market overview for top US equities. Click any card for the full analysis.',
 }
 
-export const revalidate = 30
+// No segment-level revalidate — ky handles requests without Next.js cache
+const loadSearchParams = createLoader({
+  page: parseAsInteger.withDefault(1),
+  search: parseAsString.withDefault(''),
+  sector: parseAsString.withDefault(''),
+})
 
-function formatCompactNumber(num: number) {
-  const formatter = Intl.NumberFormat('en-US', {
-    notation: 'compact',
-    maximumFractionDigits: 1,
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const { page, search, sector } = loadSearchParams(await searchParams)
+
+  // Filter the full ticker list based on active search/sector filters
+  const filteredList = SUPPORTED_TICKERS.filter((entry) => {
+    const matchesSector = !sector || entry.sector === sector
+    const matchesSearch =
+      !search ||
+      entry.ticker.toLowerCase().includes(search.toLowerCase())
+    return matchesSector && matchesSearch
   })
-  return formatter.format(num)
-}
 
-async function TickerCard({ ticker }: { ticker: string }) {
-  let meta
-  try {
-    meta = await fetchChartMeta(ticker)
-  } catch {
-    meta = null
-  }
+  const totalPages = getTotalPages(filteredList)
+  const pageTickers = getPaginatedTickers(page, filteredList)
 
-  const price = meta?.regularMarketPrice ?? 0
-  const prevClose = meta?.chartPreviousClose ?? 0
-  const change =
-    prevClose !== 0 ? ((price - prevClose) / prevClose) * 100 : 0
-
-  const isUp = change > 0
-  const isDown = change < 0
-  const trendColorClass = isUp
-    ? 'text-trend-up'
-    : isDown
-      ? 'text-trend-down'
-      : 'text-on-surface-variant'
-
-  const sign = change > 0 ? '+' : ''
-  const formattedChange = meta ? `${sign}${change.toFixed(2)}%` : '—'
-  const displayPrice = meta ? `${price.toFixed(2)}` : '—'
-  const volume = meta ? formatCompactNumber(meta.regularMarketVolume) : '—'
+  // Fetch all stocks for the current page in one parallel batch
+  const stocks = await fetchPageStocks(pageTickers)
 
   return (
-    <Link href={`/${ticker}`} className="group block animate-fade-up">
-      <article className="bg-surface-card border border-border-hairline rounded hover:border-border-active transition-colors flex flex-col h-full hover:shadow-lg hover:shadow-primary/5">
-        <div className="p-[20px] flex justify-between items-start">
-          <div>
-            <h2 className="font-label-caps text-xs tracking-widest uppercase text-primary">{ticker}</h2>
-            <p className="font-body-sm text-sm text-on-surface-variant truncate max-w-[120px] mt-1">
-              {meta?.longName ?? 'Loading...'}
-            </p>
-          </div>
-          <span className={`font-data-mono text-sm ${trendColorClass}`}>
-            {formattedChange}
-          </span>
-        </div>
-        <div className="px-[20px] pb-[20px] flex-grow">
-          <span className="font-data-mono text-[24px] font-bold text-primary tracking-tight">
-            {displayPrice}
-          </span>
-        </div>
-        <div className="border-t border-border-hairline p-[20px] flex justify-between items-center bg-surface-container-lowest/50">
-          <div className="flex flex-col">
-            <span className="font-label-caps text-[10px] tracking-wider uppercase text-on-surface-variant">HIGH</span>
-            <span className="font-data-mono text-sm text-primary mt-1">
-              {meta ? meta.regularMarketDayHigh.toFixed(2) : '—'}
-            </span>
-          </div>
-          <div className="flex flex-col text-right">
-            <span className="font-label-caps text-[10px] tracking-wider uppercase text-on-surface-variant">VOL</span>
-            <span className="font-data-mono text-sm text-primary mt-1">{volume}</span>
-          </div>
-        </div>
-      </article>
-    </Link>
-  )
-}
-
-function TickerCardSkeleton() {
-  return (
-    <article className="bg-surface-card border border-border-hairline rounded flex flex-col h-[170px]">
-      <div className="p-[20px] flex justify-between items-start">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-12 bg-border-active" />
-          <Skeleton className="h-3 w-24 bg-border-active" />
-        </div>
-        <Skeleton className="h-4 w-16 bg-border-active" />
-      </div>
-      <div className="px-[20px] pb-[20px] flex-grow">
-        <Skeleton className="h-8 w-20 bg-border-active" />
-      </div>
-      <div className="border-t border-border-hairline p-[20px] flex justify-between items-center bg-surface-container-lowest/50">
-        <div className="space-y-1">
-          <Skeleton className="h-2 w-8 bg-border-active" />
-          <Skeleton className="h-4 w-12 bg-border-active" />
-        </div>
-        <div className="space-y-1 items-end flex flex-col">
-          <Skeleton className="h-2 w-8 bg-border-active" />
-          <Skeleton className="h-4 w-12 bg-border-active" />
-        </div>
-      </div>
-    </article>
-  )
-}
-
-export default function HomePage() {
-  return (
-    <main className="flex-grow pt-24 pb-12 px-4 sm:px-6 md:px-8 max-w-[1400px] mx-auto w-full flex flex-col gap-8">
+    <div className="flex-grow pt-24 pb-12 px-4 sm:px-6 md:px-8 max-w-[1400px] mx-auto w-full flex flex-col gap-8">
+      {/* Header */}
       <section className="flex flex-col gap-2 animate-fade-up">
-        <h1 className="font-headline-lg text-3xl md:text-4xl text-primary tracking-tight font-semibold">Market Overview</h1>
-        <p className="font-body-sm text-sm text-on-surface-variant">Real-time institutional grade data visualization.</p>
+        <h1 className="font-headline-lg text-3xl md:text-4xl text-primary tracking-tight font-semibold">
+          Market Overview
+        </h1>
+        <p className="font-body-sm text-sm text-on-surface-variant">
+          Real-time institutional grade data visualization.
+        </p>
       </section>
 
-      {/* Stock Grid (Bento Style) */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 stagger">
-        {SUPPORTED_TICKERS.map((ticker) => (
-          <Suspense key={ticker} fallback={<TickerCardSkeleton />}>
-            <TickerCard ticker={ticker} />
-          </Suspense>
-        ))}
-      </section>
+      {/* Filters */}
+      <HomeFilters resultCount={filteredList.length} />
+
+      {/* Stock grid — all cards load at the same time */}
+      {stocks.length > 0 ? (
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fade-up">
+          {stocks.map(({ ticker, sector: s, meta }) => (
+            <StockCard key={ticker} ticker={ticker} sector={s} meta={meta} />
+          ))}
+        </section>
+      ) : (
+        <div className="flex flex-col items-center gap-3 py-16 text-center animate-fade-up">
+          <p className="font-body-md text-on-surface-variant">
+            No stocks match your filters.
+          </p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination totalPages={totalPages} />
+      )}
 
       {/* Footer */}
       <p className="text-[11px] text-on-surface-variant text-center pt-2">
@@ -138,8 +87,8 @@ export default function HomePage() {
         >
           Yahoo Finance
         </a>
-        {' '}· Revalidates every 30 s
+        {' '}· Showing {PAGE_SIZE} per page
       </p>
-    </main>
+    </div>
   )
 }

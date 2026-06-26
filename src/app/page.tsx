@@ -50,10 +50,7 @@ function HomeContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [search, setSearch] = useQueryState(
-    'search',
-    parseAsString.withDefault('')
-  )
+  const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 300)
   const [page, setPage] = useState(1)
 
@@ -94,10 +91,10 @@ function HomeContent() {
   // 2. Reset search and page on screener change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    void setSearch('')
+    setSearch('')
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
-  }, [screener, setSearch])
+  }, [screener])
 
   // Reset page to 1 on search change
   useEffect(() => {
@@ -163,8 +160,8 @@ function HomeContent() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant pointer-events-none" />
           <input
             type="text"
-            value={search || ''}
-            onChange={(e) => void setSearch(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search symbol or name..."
             className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface-card border border-border-hairline text-sm text-primary placeholder:text-on-surface-variant focus:outline-none focus:border-ring/50 focus:ring-1 focus:ring-ring/30 transition-colors"
           />

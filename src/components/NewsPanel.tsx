@@ -1,12 +1,14 @@
 'use client'
 
-import { ExternalLink, Newspaper } from 'lucide-react'
+import { ExternalLink, Newspaper, KeyRound } from 'lucide-react'
 import { useStockNews } from '@/hooks/useStockNews'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 
 interface NewsPanelProps {
   ticker: string
+  /** When true, the API key is configured server-side */
+  hasApiKey?: boolean
 }
 
 function timeAgo(unixSeconds: number): string {
@@ -16,7 +18,7 @@ function timeAgo(unixSeconds: number): string {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
-export function NewsPanel({ ticker }: NewsPanelProps) {
+export function NewsPanel({ ticker, hasApiKey = true }: NewsPanelProps) {
   const { news, isLoading, error } = useStockNews(ticker, 8)
 
   return (
@@ -48,9 +50,14 @@ export function NewsPanel({ ticker }: NewsPanelProps) {
       ) : error ? (
         <p className="text-sm text-slate-400">{error}</p>
       ) : !news.length ? (
-        <p className="text-sm text-slate-400">
-          No recent news found for {ticker}.
-        </p>
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <KeyRound className="h-8 w-8 text-slate-600" />
+          <p className="text-sm text-slate-400 max-w-[200px]">
+            {!hasApiKey
+              ? 'News unavailable — configure FINNHUB_API_KEY to enable.'
+              : `No recent news found for ${ticker}.`}
+          </p>
+        </div>
       ) : (
         <ul className="space-y-0 divide-y divide-white/5">
           {news.map((article) => (

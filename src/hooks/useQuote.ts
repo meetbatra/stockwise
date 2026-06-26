@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { Quote } from '@/lib/types'
+import type { YahooMeta } from '@/lib/types'
 
 interface UseQuoteOptions {
   /** Poll interval in milliseconds. Default: 15 000 ms */
@@ -11,7 +11,7 @@ interface UseQuoteOptions {
 }
 
 interface UseQuoteResult {
-  quote: Quote | null
+  quote: YahooMeta | null
   isLoading: boolean
   error: string | null
   /** Manually trigger a refresh */
@@ -19,16 +19,15 @@ interface UseQuoteResult {
 }
 
 /**
- * Client-side hook that fetches a real-time stock quote and polls at the
- * given interval.  Calls our own /api/quote/[ticker] to keep the Finnhub key
- * server-side.
+ * Client-side hook that fetches a real-time stock quote from Yahoo Finance
+ * via our own /api/quote/[ticker] route and polls at the given interval.
  */
 export function useQuote(
   ticker: string,
   { refreshInterval = 15_000, enabled = true }: UseQuoteOptions = {},
 ): UseQuoteResult {
-  const [quote, setQuote] = useState<Quote | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [quote, setQuote] = useState<YahooMeta | null>(null)
+  const [isLoading, setIsLoading] = useState(enabled)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -50,8 +49,8 @@ export function useQuote(
         throw new Error(json?.error ?? `HTTP ${res.status}`)
       }
 
-      const { quote } = await res.json()
-      setQuote(quote)
+      const data: YahooMeta = await res.json()
+      setQuote(data)
       setError(null)
     } catch (err) {
       if ((err as Error).name === 'AbortError') return
@@ -64,10 +63,10 @@ export function useQuote(
   useEffect(() => {
     if (!enabled) return
 
-    setIsLoading(true)
-    fetchQuote()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchQuote()
 
-    intervalRef.current = setInterval(fetchQuote, refreshInterval)
+    intervalRef.current = setInterval(() => void fetchQuote(), refreshInterval)
 
     return () => {
       abortRef.current?.abort()

@@ -1,10 +1,9 @@
-import { type NextRequest } from 'next/server'
-import { fetchCandles } from '@/lib/finnhub'
-import type { ApiCandlesResponse, ApiErrorResponse } from '@/lib/types'
+import { type NextRequest, NextResponse } from 'next/server'
+import { fetchCandles } from '@/lib/yahoo'
 
 type Params = { ticker: string }
-type Resolution = '1' | '5' | '15' | '30' | '60' | 'D' | 'W' | 'M'
-const VALID_RESOLUTIONS: Resolution[] = ['1', '5', '15', '30', '60', 'D', 'W', 'M']
+
+const DEFAULT_INTERVAL = '1d'
 
 export async function GET(
   req: NextRequest,
@@ -13,22 +12,17 @@ export async function GET(
   const { ticker } = await params
   const { searchParams } = req.nextUrl
 
-  const rawRes = searchParams.get('resolution') ?? 'D'
-  const resolution: Resolution = (VALID_RESOLUTIONS as string[]).includes(rawRes)
-    ? (rawRes as Resolution)
-    : 'D'
-
-  const from = searchParams.has('from') ? Number(searchParams.get('from')) : undefined
-  const to = searchParams.has('to') ? Number(searchParams.get('to')) : undefined
+  const now = Math.floor(Date.now() / 1000)
+  const from = searchParams.has('from')
+    ? Number(searchParams.get('from'))
+    : now - 130 * 24 * 60 * 60 // ~130 calendar days ≈ 90 trading days
+  const to = searchParams.has('to') ? Number(searchParams.get('to')) : now
+  const interval = searchParams.get('interval') ?? DEFAULT_INTERVAL
 
   try {
-    const candles = await fetchCandles(ticker, resolution, from, to)
-    return Response.json({ candles } satisfies ApiCandlesResponse)
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : 'Failed to fetch candles'
-    return Response.json({ error: message } satisfies ApiErrorResponse, {
-      status: 500,
-    })
+    const candles = await fetchCandles(ticker, from, to, interval)
+    return NextResponse.json(candles)
+  } catch {
+    return NextResponse.json({ error: 'Failed to fetch candles' }, { status: 500 })
   }
 }

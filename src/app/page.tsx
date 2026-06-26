@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { type Metadata } from 'next'
 import Link from 'next/link'
-import { fetchQuote, fetchProfile } from '@/lib/finnhub'
+import { fetchChartMeta } from '@/lib/yahoo'
 import { SUPPORTED_TICKERS } from '@/lib/tickers'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -15,31 +15,37 @@ export const revalidate = 30
 
 function formatCompactNumber(num: number) {
   const formatter = Intl.NumberFormat('en-US', {
-    notation: "compact",
-    maximumFractionDigits: 1
+    notation: 'compact',
+    maximumFractionDigits: 1,
   })
   return formatter.format(num)
 }
 
 async function TickerCard({ ticker }: { ticker: string }) {
-  const [quoteResult, profileResult] = await Promise.allSettled([
-    fetchQuote(ticker),
-    fetchProfile(ticker),
-  ])
+  let meta
+  try {
+    meta = await fetchChartMeta(ticker)
+  } catch {
+    meta = null
+  }
 
-  const q = quoteResult.status === 'fulfilled' ? quoteResult.value : null
-  const p = profileResult.status === 'fulfilled' ? profileResult.value : null
+  const price = meta?.regularMarketPrice ?? 0
+  const prevClose = meta?.chartPreviousClose ?? 0
+  const change =
+    prevClose !== 0 ? ((price - prevClose) / prevClose) * 100 : 0
 
-  const change = q?.dp ?? 0
   const isUp = change > 0
   const isDown = change < 0
-  const trendColorClass = isUp ? 'text-trend-up' : isDown ? 'text-trend-down' : 'text-on-surface-variant'
+  const trendColorClass = isUp
+    ? 'text-trend-up'
+    : isDown
+      ? 'text-trend-down'
+      : 'text-on-surface-variant'
 
   const sign = change > 0 ? '+' : ''
-  const formattedChange = `${sign}${change.toFixed(2)}%`
-  const price = q ? q.c.toFixed(2) : '—'
-  const open = q ? q.o.toFixed(2) : '—'
-  const mcap = p?.marketCapitalization ? formatCompactNumber(p.marketCapitalization * 1e6) : '—'
+  const formattedChange = meta ? `${sign}${change.toFixed(2)}%` : '—'
+  const displayPrice = meta ? `${price.toFixed(2)}` : '—'
+  const volume = meta ? formatCompactNumber(meta.regularMarketVolume) : '—'
 
   return (
     <Link href={`/${ticker}`} className="group block animate-fade-up">
@@ -47,7 +53,9 @@ async function TickerCard({ ticker }: { ticker: string }) {
         <div className="p-[20px] flex justify-between items-start">
           <div>
             <h2 className="font-label-caps text-xs tracking-widest uppercase text-primary">{ticker}</h2>
-            <p className="font-body-sm text-sm text-on-surface-variant truncate max-w-[120px] mt-1">{p?.name ?? 'Loading...'}</p>
+            <p className="font-body-sm text-sm text-on-surface-variant truncate max-w-[120px] mt-1">
+              {meta?.longName ?? 'Loading...'}
+            </p>
           </div>
           <span className={`font-data-mono text-sm ${trendColorClass}`}>
             {formattedChange}
@@ -55,17 +63,19 @@ async function TickerCard({ ticker }: { ticker: string }) {
         </div>
         <div className="px-[20px] pb-[20px] flex-grow">
           <span className="font-data-mono text-[24px] font-bold text-primary tracking-tight">
-            {price}
+            {displayPrice}
           </span>
         </div>
         <div className="border-t border-border-hairline p-[20px] flex justify-between items-center bg-surface-container-lowest/50">
           <div className="flex flex-col">
-            <span className="font-label-caps text-[10px] tracking-wider uppercase text-on-surface-variant">OPEN</span>
-            <span className="font-data-mono text-sm text-primary mt-1">{open}</span>
+            <span className="font-label-caps text-[10px] tracking-wider uppercase text-on-surface-variant">HIGH</span>
+            <span className="font-data-mono text-sm text-primary mt-1">
+              {meta ? meta.regularMarketDayHigh.toFixed(2) : '—'}
+            </span>
           </div>
           <div className="flex flex-col text-right">
-            <span className="font-label-caps text-[10px] tracking-wider uppercase text-on-surface-variant">MCAP</span>
-            <span className="font-data-mono text-sm text-primary mt-1">{mcap}</span>
+            <span className="font-label-caps text-[10px] tracking-wider uppercase text-on-surface-variant">VOL</span>
+            <span className="font-data-mono text-sm text-primary mt-1">{volume}</span>
           </div>
         </div>
       </article>
@@ -121,12 +131,12 @@ export default function HomePage() {
       <p className="text-[11px] text-on-surface-variant text-center pt-2">
         Data via{' '}
         <a
-          href="https://finnhub.io"
+          href="https://finance.yahoo.com"
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:text-primary transition-colors"
         >
-          Finnhub
+          Yahoo Finance
         </a>
         {' '}· Revalidates every 30 s
       </p>

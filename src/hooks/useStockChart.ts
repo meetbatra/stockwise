@@ -3,10 +3,8 @@
 import { useEffect, useState } from 'react'
 import type { CandlePoint } from '@/lib/types'
 
-type Resolution = '1' | '5' | '15' | '30' | '60' | 'D' | 'W' | 'M'
-
 interface UseStockChartOptions {
-  resolution?: Resolution
+  interval?: string
   from?: number
   to?: number
   enabled?: boolean
@@ -20,12 +18,12 @@ interface UseStockChartResult {
 
 /**
  * Fetches OHLCV candle data for the given ticker from /api/candles/[ticker].
- * Re-fetches whenever ticker or resolution changes.
+ * Re-fetches whenever ticker, interval, from, or to changes.
  */
 export function useStockChart(
   ticker: string,
   {
-    resolution = 'D',
+    interval = '1d',
     from,
     to,
     enabled = true,
@@ -39,9 +37,8 @@ export function useStockChart(
     if (!enabled || !ticker) return
 
     const controller = new AbortController()
-    setIsLoading(true)
 
-    const params = new URLSearchParams({ resolution })
+    const params = new URLSearchParams({ interval })
     if (from) params.set('from', String(from))
     if (to) params.set('to', String(to))
 
@@ -56,8 +53,8 @@ export function useStockChart(
         }
         return res.json()
       })
-      .then(({ candles }) => {
-        setCandles(candles)
+      .then((data: CandlePoint[]) => {
+        setCandles(data)
         setError(null)
       })
       .catch((err) => {
@@ -69,7 +66,7 @@ export function useStockChart(
       .finally(() => setIsLoading(false))
 
     return () => controller.abort()
-  }, [ticker, resolution, from, to, enabled])
+  }, [ticker, interval, from, to, enabled])
 
   return { candles, isLoading, error }
 }

@@ -181,7 +181,7 @@ function HomeContent() {
       {loading ? (
         <div className="flex flex-col gap-2 animate-fade-up w-full">
           {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="h-[90px] lg:h-[72px] bg-surface-card border border-border-hairline rounded-xl animate-pulse" />
+            <div key={i} className="h-[90px] lg:h-[72px] bg-white/10 border border-white/5 rounded-xl animate-pulse" />
           ))}
         </div>
       ) : error ? (

@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useQueryState, parseAsString } from 'nuqs'
 import { useDebounce } from '@/hooks/use-debounce'
 import type { StockData } from '@/lib/yahoo-fetch'
 
@@ -27,12 +28,32 @@ function formatCompact(n: number): string {
 }
 
 export default function HomePage() {
-  const [screener, setScreener] = useState(SCREENERS[0]!.id)
+  return (
+    <Suspense fallback={
+      <div className="flex-grow pt-24 pb-12 px-4 sm:px-6 md:px-8 max-w-[1400px] mx-auto w-full flex justify-center">
+        <div className="animate-pulse flex space-x-4">
+          <div className="h-4 w-24 bg-surface-card rounded"></div>
+        </div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
+  )
+}
+
+function HomeContent() {
+  const [screener, setScreener] = useQueryState(
+    'filter',
+    parseAsString.withDefault(SCREENERS[0]!.id).withOptions({ clearOnDefault: false })
+  )
   const [stocks, setStocks] = useState<StockData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useQueryState(
+    'search',
+    parseAsString.withDefault('')
+  )
   const debouncedSearch = useDebounce(search, 300)
   const [page, setPage] = useState(1)
 
@@ -73,10 +94,10 @@ export default function HomePage() {
   // 2. Reset search and page on screener change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSearch('')
+    void setSearch('')
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1)
-  }, [screener])
+  }, [screener, setSearch])
 
   // Reset page to 1 on search change
   useEffect(() => {
@@ -142,8 +163,8 @@ export default function HomePage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant pointer-events-none" />
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={search || ''}
+            onChange={(e) => void setSearch(e.target.value)}
             placeholder="Search symbol or name..."
             className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface-card border border-border-hairline text-sm text-primary placeholder:text-on-surface-variant focus:outline-none focus:border-ring/50 focus:ring-1 focus:ring-ring/30 transition-colors"
           />

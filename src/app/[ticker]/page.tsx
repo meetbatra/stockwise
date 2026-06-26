@@ -27,20 +27,24 @@ export default async function TickerPage({ params }: Props) {
 
   let meta
   let initialCandles
+  let initialWeeklyCandles
   let initialNews
   try {
     const now = Math.floor(Date.now() / 1000)
     const fetchFrom = now - 365 * 86400
+    const fetchWeeklyFrom = now - 7 * 86400
     
     // Fetch all initial data in parallel so the page stays in the loading.tsx skeleton until EVERYTHING is ready
-    const [quoteData, candlesData, newsData] = await Promise.all([
+    const [quoteData, candlesData, weeklyCandlesData, newsData] = await Promise.all([
       fetchQuote(t),
       fetchCandles(t, fetchFrom, now, '1d'),
+      fetchCandles(t, fetchWeeklyFrom, now, '60m'),
       fetchNews(t)
     ])
     
     meta = quoteData
     initialCandles = candlesData
+    initialWeeklyCandles = weeklyCandlesData
     initialNews = newsData
   } catch {
     notFound()
@@ -63,7 +67,7 @@ export default async function TickerPage({ params }: Props) {
         {/* Left column — chart + stats */}
         <div className="lg:col-span-2 space-y-6">
           <div className="group relative overflow-hidden rounded-2xl bg-surface-card border border-hairline p-5 transition-all duration-300 hover:border-emerald-500/30 hover:bg-[#111827] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
-            <StockChart ticker={t} initialCandles={initialCandles} />
+            <StockChart ticker={t} initialCandles={initialCandles} initialWeeklyCandles={initialWeeklyCandles} />
           </div>
 
           <div className="group relative overflow-hidden rounded-2xl bg-surface-card border border-hairline p-5 transition-all duration-300 hover:border-emerald-500/30 hover:bg-[#111827] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]">

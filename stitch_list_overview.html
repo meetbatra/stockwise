@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stockwise - Market Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#93000a",
+                        "surface-container-low": "#131b2e",
+                        "inverse-surface": "#dae2fd",
+                        "on-tertiary-fixed": "#410005",
+                        "secondary": "#ffb2b7",
+                        "on-error": "#690005",
+                        "secondary-container": "#b50036",
+                        "on-primary": "#003824",
+                        "primary": "#4edea3",
+                        "tertiary-container": "#fc7c78",
+                        "surface-container-lowest": "#060e20",
+                        "primary-fixed-dim": "#4edea3",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "surface-bright": "#31394d",
+                        "inverse-primary": "#006c49",
+                        "primary-container": "#10b981",
+                        "on-error-container": "#ffdad6",
+                        "on-surface-variant": "#bbcabf",
+                        "on-secondary": "#67001b",
+                        "outline-variant": "#3c4a42",
+                        "on-secondary-container": "#ffc2c4",
+                        "on-secondary-fixed-variant": "#92002a",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#222a3d",
+                        "surface-tint": "#4edea3",
+                        "on-primary-fixed": "#002113",
+                        "secondary-fixed-dim": "#ffb2b7",
+                        "on-secondary-fixed": "#40000d",
+                        "secondary-fixed": "#ffdadb",
+                        "on-tertiary": "#650911",
+                        "outline": "#86948a",
+                        "on-surface": "#dae2fd",
+                        "inverse-on-surface": "#283044",
+                        "on-background": "#dae2fd",
+                        "tertiary-fixed": "#ffdad7",
+                        "surface-variant": "#2d3449",
+                        "tertiary": "#ffb3af",
+                        "background": "#0b1326",
+                        "surface-container-highest": "#2d3449",
+                        "surface": "#0b1326",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-tertiary-fixed-variant": "#842225",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-container": "#711419",
+                        "primary-fixed": "#6ffbbe",
+                        "surface-container": "#171f33",
+                        "on-primary-container": "#00422b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-padding": "24px",
+                        "base": "4px",
+                        "section-gap": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "caption": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background-color: rgba(45, 52, 73, 0.5); /* surface-variant with opacity */
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-panel:hover {
+            background-color: rgba(45, 52, 73, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md flex flex-col antialiased">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 border-b border-white/10 bg-surface/50 backdrop-blur-xl shadow-none">
+<div class="flex justify-between items-center px-container-padding h-16 w-full">
+<!-- Brand -->
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-headline-md" data-icon="trending_up">trending_up</span>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Stockwise</span>
+</div>
+<!-- Navigation Links (Web) -->
+<div class="hidden md:flex items-center gap-6 font-label-md text-label-md">
+<a class="text-primary border-b-2 border-primary pb-1 hover:bg-white/5 transition-colors active:scale-95 duration-150" href="#">AAPL</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors active:scale-95 duration-150" href="#">MSFT</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors active:scale-95 duration-150" href="#">GOOGL</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors active:scale-95 duration-150" href="#">AMZN</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors active:scale-95 duration-150" href="#">NVDA</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors active:scale-95 duration-150" href="#">META</a>
+</div>
+<!-- Search and Actions -->
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm" data-icon="search">search</span>
+<input class="bg-surface-container-highest/80 border border-white/10 rounded-full py-1.5 pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-on-surface placeholder:text-white/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]" placeholder="Search..." type="text"/>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-grow pt-[104px] px-container-padding pb-section-gap flex flex-col gap-section-gap">
+<!-- Hero Section -->
+<header class="max-w-4xl">
+<h1 class="font-display-lg text-display-lg md:text-display-lg text-headline-lg-mobile text-on-surface mb-2">Market Overview</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Real-time quotes for top US equities. Click any row for the full analysis.</p>
+</header>
+<!-- Ticker List -->
+<div class="flex flex-col gap-2">
+<!-- List Header (Desktop) -->
+<div class="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] gap-4 px-5 py-2 text-on-surface-variant font-caption text-caption uppercase tracking-wider border-b border-white/10 mb-2">
+<div>Symbol</div>
+<div class="text-right">Price</div>
+<div class="text-right">Change</div>
+<div class="text-right">Open</div>
+<div class="text-right">High</div>
+<div class="text-right">Low</div>
+</div>
+<!-- AAPL Row -->
+<div class="glass-panel rounded-xl p-4 lg:p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+<!-- Symbol & Logo -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
+<img alt="Apple Logo" class="w-6 h-6 object-contain opacity-80" data-alt="A minimalist, flat vector logo of an apple silhouette in pristine white on a dark charcoal background. The design is sleek, modern, and perfectly suited for a premium financial dashboard UI icon. High contrast, sharp edges, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDodRv6EFBtJhPGKWgaQ7yNyhOT40K2bJV-J3Sbu-K0qFUjplwMyyILQAaxt60TWnberGkIMJN-UOCT9_6rEOXr6sSl6WFqyaFJzKHOdm90-Z0DcMXLKFVWoypzR43kfgKYhDkOvd7O9_FGeaJny57hBlV-Fn_ipuY2m5AIjnnfvA4eAHKrdM4TJgf-HE9pzByDqj3Pv7g9ZjMPQ5S1Nm1fQmq6dXtAPvm8FNiJ2JMy2oqKYU7kxan-xqury9J53Tkj_uA0VU3R-U0"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold tracking-wider">AAPL</h3>
+<p class="font-caption text-caption text-on-surface-variant line-clamp-1">Apple Inc.</p>
+</div>
+</div>
+<!-- Price & Change Mobile Wrapper -->
+<div class="flex justify-between items-center lg:hidden z-10">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface">$173.50</div>
+<div class="font-caption text-caption text-primary mt-1">+$2.48 today</div>
+</div>
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+1.45%</span>
+</div>
+</div>
+<!-- Price Desktop -->
+<div class="hidden lg:block text-right z-10">
+<div class="font-label-md text-label-md text-on-surface font-bold">$173.50</div>
+<div class="font-caption text-caption text-primary mt-0.5">+$2.48</div>
+</div>
+<!-- Change Desktop -->
+<div class="hidden lg:flex justify-end z-10">
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+1.45%</span>
+</div>
+</div>
+<!-- OHL Mobile/Desktop -->
+<div class="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-white/10 lg:border-t-0 mt-2 lg:mt-0">
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$171.02</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">High</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$174.12</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Low</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$170.80</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+</div>
+<!-- MSFT Row -->
+<div class="glass-panel rounded-xl p-4 lg:p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+<!-- Symbol & Logo -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
+<img alt="Microsoft Logo" class="w-6 h-6 object-contain opacity-80" data-alt="A minimalist, flat vector logo of a four-pane window symbol in crisp white on a dark slate background. The design is clean, geometric, and perfectly suited for a modern financial dashboard UI icon. High contrast, sharp edges, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9NBWcGFJzslpCzV3o-DcShtoW_otEdt3L0c6Fh8P7D79ZiUBfnHGAcAJaloW8xUXAqDhfH-yitSQqI08uCcZArZxP_StXO453kpBQIfYQhqrObrAZJ94ifSe51yBXRPC20gi2c53OIBQxLQzk2lBbHS463e8lZ3GLvtBsh-o115B3Exe7-zfsU74TFvL77y2_6O3VY3114va8ks8uYQjADhMgbNQ_tu6YZTMEL4hJwkubXSOKZLnKSSpSeZI9zga5u9UO-kWfLbI"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold tracking-wider">MSFT</h3>
+<p class="font-caption text-caption text-on-surface-variant line-clamp-1">Microsoft Corp.</p>
+</div>
+</div>
+<!-- Price & Change Mobile Wrapper -->
+<div class="flex justify-between items-center lg:hidden z-10">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface">$338.11</div>
+<div class="font-caption text-caption text-primary mt-1">+$2.75 today</div>
+</div>
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+0.82%</span>
+</div>
+</div>
+<!-- Price Desktop -->
+<div class="hidden lg:block text-right z-10">
+<div class="font-label-md text-label-md text-on-surface font-bold">$338.11</div>
+<div class="font-caption text-caption text-primary mt-0.5">+$2.75</div>
+</div>
+<!-- Change Desktop -->
+<div class="hidden lg:flex justify-end z-10">
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+0.82%</span>
+</div>
+</div>
+<!-- OHL Mobile/Desktop -->
+<div class="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-white/10 lg:border-t-0 mt-2 lg:mt-0">
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$335.20</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">High</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$339.40</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Low</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$334.80</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+</div>
+<!-- GOOGL Row -->
+<div class="glass-panel rounded-xl p-4 lg:p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+<!-- Symbol & Logo -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
+<img alt="Alphabet Logo" class="w-6 h-6 object-contain opacity-80" data-alt="A minimalist, flat vector logo of a 'G' symbol in pure white on a deep blue-grey background. The design is bold, legible, and perfectly suited for a premium financial dashboard UI icon. High contrast, clean curves, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxqWY4MsfA6KhufZ0BZgpvPy8a9Ygt2T_qWfnBwyyRW0A0-zd5z1bvZminGq69F7hGp_PnXaBnrYeCjLXQzuEkkwnzdX1yx_7mMh3BX2JJ1JlE3bFN18O9vuE56D_QimthQ0-R6Ofm6Nn7MYTzbTOonZhQURIVrdN4nrYSazt2mtrQwTuR9kys8kfbnbJYEmFJepU3nQV8tS2V8ptn9NwZko34bJY4aG_N0TyTQYCo-uLGie4D9UW_zpOBNCUsNYH9gvSMBA6ts1c"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold tracking-wider">GOOGL</h3>
+<p class="font-caption text-caption text-on-surface-variant line-clamp-1">Alphabet Inc.</p>
+</div>
+</div>
+<!-- Price & Change Mobile Wrapper -->
+<div class="flex justify-between items-center lg:hidden z-10">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface">$132.55</div>
+<div class="font-caption text-caption text-error mt-1">-$0.60 today</div>
+</div>
+<div class="bg-error-container/20 border border-error-container/30 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="arrow_downward">arrow_downward</span>
+<span class="font-caption text-caption text-error font-semibold">-0.45%</span>
+</div>
+</div>
+<!-- Price Desktop -->
+<div class="hidden lg:block text-right z-10">
+<div class="font-label-md text-label-md text-on-surface font-bold">$132.55</div>
+<div class="font-caption text-caption text-error mt-0.5">-$0.60</div>
+</div>
+<!-- Change Desktop -->
+<div class="hidden lg:flex justify-end z-10">
+<div class="bg-error-container/20 border border-error-container/30 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="arrow_downward">arrow_downward</span>
+<span class="font-caption text-caption text-error font-semibold">-0.45%</span>
+</div>
+</div>
+<!-- OHL Mobile/Desktop -->
+<div class="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-white/10 lg:border-t-0 mt-2 lg:mt-0">
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$133.10</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">High</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$134.05</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Low</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$131.90</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+</div>
+<!-- NVDA Row -->
+<div class="glass-panel rounded-xl p-4 lg:p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+<!-- Symbol & Logo -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
+<img alt="NVIDIA Logo" class="w-6 h-6 object-contain opacity-80" data-alt="A minimalist, flat vector logo of an eye-like swirl symbol in crisp white on a dark charcoal background. The design is sleek, futuristic, and perfectly suited for a premium financial dashboard UI icon. High contrast, sharp edges, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGJZJYcjUib81DEAlS4qkfgcCV19xivm6rn4NlweMSCuOdsHMH3CCybW1vF8MOMgYvIiw46fQK89wvT-_qUw1EPcUGHeiWEl27qhCi_k20JE9SY5VbRmkIgROADt5P3euGb6kvagRnmjMnKV-QXrkz6Kj7B5QjEqY1iWkM6e7zeMJa0TkxCzTdQomTRS85SjKCTYoJTEeD8eXkMczhGIBpeEy_HKsK7njMMmS7og6pZEEhaauuAhQCbYy5f1oW9t5yibYBCPWcSyQ"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold tracking-wider">NVDA</h3>
+<p class="font-caption text-caption text-on-surface-variant line-clamp-1">NVIDIA Corp.</p>
+</div>
+</div>
+<!-- Price & Change Mobile Wrapper -->
+<div class="flex justify-between items-center lg:hidden z-10">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface">$465.20</div>
+<div class="font-caption text-caption text-primary mt-1">+$14.08 today</div>
+</div>
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+3.12%</span>
+</div>
+</div>
+<!-- Price Desktop -->
+<div class="hidden lg:block text-right z-10">
+<div class="font-label-md text-label-md text-on-surface font-bold">$465.20</div>
+<div class="font-caption text-caption text-primary mt-0.5">+$14.08</div>
+</div>
+<!-- Change Desktop -->
+<div class="hidden lg:flex justify-end z-10">
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+3.12%</span>
+</div>
+</div>
+<!-- OHL Mobile/Desktop -->
+<div class="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-white/10 lg:border-t-0 mt-2 lg:mt-0">
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$452.10</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">High</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$468.50</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Low</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$450.20</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+</div>
+<!-- TSLA Row -->
+<div class="glass-panel rounded-xl p-4 lg:p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+<!-- Symbol & Logo -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
+<img alt="Tesla Logo" class="w-6 h-6 object-contain opacity-80" data-alt="A minimalist, flat vector logo of a sleek 'T' symbol in pristine white on a deep slate background. The design is modern, sharp, and perfectly suited for a premium financial dashboard UI icon. High contrast, clean lines, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZThG4owrxlMuXuPkDDU7c_yxWYEXd7MoosCSE35x84ySTDByp1QMeKXb99AzDPRySSfOIEChWUhqc7zblSKZPpaYlZTQacSUOysuL59HvOxBtdqZpf_7BzQBjM1MfCwyjYPwnz-IOzMZxsT_zInt-BPKKWsB7LSCRzLex5Z49w3LfPHCxm-NWdE7T9j_8zN_4zLp8aPBEK9uxw5iqKRr8hwtqxz1bU-BeTd51pSD_Y9H9zjCHl8JvELpRhV8hFuYG6CZWsvUPS-k"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold tracking-wider">TSLA</h3>
+<p class="font-caption text-caption text-on-surface-variant line-clamp-1">Tesla Inc.</p>
+</div>
+</div>
+<!-- Price & Change Mobile Wrapper -->
+<div class="flex justify-between items-center lg:hidden z-10">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface">$245.30</div>
+<div class="font-caption text-caption text-error mt-1">-$2.98 today</div>
+</div>
+<div class="bg-error-container/20 border border-error-container/30 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="arrow_downward">arrow_downward</span>
+<span class="font-caption text-caption text-error font-semibold">-1.20%</span>
+</div>
+</div>
+<!-- Price Desktop -->
+<div class="hidden lg:block text-right z-10">
+<div class="font-label-md text-label-md text-on-surface font-bold">$245.30</div>
+<div class="font-caption text-caption text-error mt-0.5">-$2.98</div>
+</div>
+<!-- Change Desktop -->
+<div class="hidden lg:flex justify-end z-10">
+<div class="bg-error-container/20 border border-error-container/30 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="arrow_downward">arrow_downward</span>
+<span class="font-caption text-caption text-error font-semibold">-1.20%</span>
+</div>
+</div>
+<!-- OHL Mobile/Desktop -->
+<div class="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-white/10 lg:border-t-0 mt-2 lg:mt-0">
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$248.50</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">High</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$250.10</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Low</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$243.20</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+</div>
+<!-- AMZN Row -->
+<div class="glass-panel rounded-xl p-4 lg:p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+<!-- Symbol & Logo -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
+<img alt="Amazon Logo" class="w-6 h-6 object-contain opacity-80" data-alt="A minimalist, flat vector logo of an arrow smiling symbol in crisp white on a dark charcoal background. The design is recognizable, clean, and perfectly suited for a modern financial dashboard UI icon. High contrast, smooth curves, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkrtSEgCBIa_uyVwolbEYI126OpLxUP2ytp638_Gic6-gdMYgWGK4wFoEDqv4xpesWN38EWCuOEUn_Alj7Orb3aG9XSiS5SXWn51Tx6bf4r4SB_kpWn_d6wdQLIkuJeVO6Xqe2W4pmUV-jHatvLncO-0wepq4Vugvx_3fL0WGtEZeIbz8t1wi5kpO1tcFURAxawkXrDboMMIsmCtQeRaPNSNd9g4Be0DRd934q3NjQqaR_75mksoe_ufvG04l85-YLVZvvy-CRH0Q"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold tracking-wider">AMZN</h3>
+<p class="font-caption text-caption text-on-surface-variant line-clamp-1">Amazon.com Inc.</p>
+</div>
+</div>
+<!-- Price & Change Mobile Wrapper -->
+<div class="flex justify-between items-center lg:hidden z-10">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface">$135.40</div>
+<div class="font-caption text-caption text-primary mt-1">+$0.74 today</div>
+</div>
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+0.55%</span>
+</div>
+</div>
+<!-- Price Desktop -->
+<div class="hidden lg:block text-right z-10">
+<div class="font-label-md text-label-md text-on-surface font-bold">$135.40</div>
+<div class="font-caption text-caption text-primary mt-0.5">+$0.74</div>
+</div>
+<!-- Change Desktop -->
+<div class="hidden lg:flex justify-end z-10">
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+0.55%</span>
+</div>
+</div>
+<!-- OHL Mobile/Desktop -->
+<div class="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-white/10 lg:border-t-0 mt-2 lg:mt-0">
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$134.80</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">High</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$136.20</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Low</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$134.10</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+</div>
+<!-- META Row -->
+<div class="glass-panel rounded-xl p-4 lg:p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+<!-- Symbol & Logo -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
+<img alt="Meta Logo" class="w-6 h-6 object-contain opacity-80" data-alt="A minimalist, flat vector logo of an infinity symbol in pure white on a deep blue-grey background. The design is sleek, continuous, and perfectly suited for a premium financial dashboard UI icon. High contrast, smooth loops, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZmBwmPo6p9vaz-GFMzsJcuMOT5HiK3NxHq0QhpYnZL-dJAiSJzfQXZ6bf-M10rS3bDAkULgfHXRfuxQGJG32AwLD4-JFaeU1me25xRnV8aXKQCu8fGPfXvLnb0_ie_zYW1LcfrqedF53JAEX4lp4tv74QTtRZKvkrBgSom-XAiIImop9DoGPyHSlmXZZ8tZsIGBimf_1-FLJ3d5ddD-QregNOIE6rZnnommF5xOh75e_8U1N991bGmTMjEJJWZanNdVYq4MrsVlI"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold tracking-wider">META</h3>
+<p class="font-caption text-caption text-on-surface-variant line-clamp-1">Meta Platforms</p>
+</div>
+</div>
+<!-- Price & Change Mobile Wrapper -->
+<div class="flex justify-between items-center lg:hidden z-10">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface">$298.60</div>
+<div class="font-caption text-caption text-primary mt-1">+$3.40 today</div>
+</div>
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+1.15%</span>
+</div>
+</div>
+<!-- Price Desktop -->
+<div class="hidden lg:block text-right z-10">
+<div class="font-label-md text-label-md text-on-surface font-bold">$298.60</div>
+<div class="font-caption text-caption text-primary mt-0.5">+$3.40</div>
+</div>
+<!-- Change Desktop -->
+<div class="hidden lg:flex justify-end z-10">
+<div class="bg-primary-container/10 border border-primary-container/20 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="arrow_upward">arrow_upward</span>
+<span class="font-caption text-caption text-primary font-semibold">+1.15%</span>
+</div>
+</div>
+<!-- OHL Mobile/Desktop -->
+<div class="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-white/10 lg:border-t-0 mt-2 lg:mt-0">
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$295.20</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">High</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$300.10</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Low</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$294.80</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+</div>
+<!-- NFLX Row -->
+<div class="glass-panel rounded-xl p-4 lg:p-4 flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] lg:items-center gap-4 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+<!-- Symbol & Logo -->
+<div class="flex items-center gap-3 z-10">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 shrink-0">
+<img alt="Netflix Logo" class="w-6 h-6 object-contain opacity-80" data-alt="A minimalist, flat vector logo of an 'N' symbol in stark white on a dark charcoal background. The design is bold, slightly curved at the bottom, and perfectly suited for a modern financial dashboard UI icon. High contrast, sharp, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC79THM0EKMJuwsTHZoJRVvVg7LCrALf6YL5pmjCiks-1hLLGriHDilr0utXAJYUfOJiggALSE5kZi-Oj1UL41EOdktf8skW-p0rAwedeL__b9GeS8uyOpjzSYZz_C-zJ5QjntFQjRy4aj_xHcdXsMWbzg3k5x9sltvLy3fMhsn1AmjmqTrfn1EK7u6Qn_wxIJwQ51Vj6X0pKS84R-uvA5QTV9k-wMvvYvocUV5kkaYqVagBVLRSmu27dLzOzdhTn8NWvtVDoDnga0"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold tracking-wider">NFLX</h3>
+<p class="font-caption text-caption text-on-surface-variant line-clamp-1">Netflix Inc.</p>
+</div>
+</div>
+<!-- Price & Change Mobile Wrapper -->
+<div class="flex justify-between items-center lg:hidden z-10">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface">$412.20</div>
+<div class="font-caption text-caption text-error mt-1">-$3.53 today</div>
+</div>
+<div class="bg-error-container/20 border border-error-container/30 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="arrow_downward">arrow_downward</span>
+<span class="font-caption text-caption text-error font-semibold">-0.85%</span>
+</div>
+</div>
+<!-- Price Desktop -->
+<div class="hidden lg:block text-right z-10">
+<div class="font-label-md text-label-md text-on-surface font-bold">$412.20</div>
+<div class="font-caption text-caption text-error mt-0.5">-$3.53</div>
+</div>
+<!-- Change Desktop -->
+<div class="hidden lg:flex justify-end z-10">
+<div class="bg-error-container/20 border border-error-container/30 rounded-full px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="arrow_downward">arrow_downward</span>
+<span class="font-caption text-caption text-error font-semibold">-0.85%</span>
+</div>
+</div>
+<!-- OHL Mobile/Desktop -->
+<div class="flex justify-between lg:contents z-10 pt-4 lg:pt-0 border-t border-white/10 lg:border-t-0 mt-2 lg:mt-0">
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Open</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$415.80</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">High</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$417.50</span>
+</div>
+<div class="flex flex-col lg:text-right">
+<span class="font-caption text-caption text-on-surface-variant/70 text-[10px] uppercase tracking-wider lg:hidden">Low</span>
+<span class="font-label-md text-label-md text-on-surface-variant">$410.10</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0 pointer-events-none"></div>
+</div>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="mt-auto border-t border-white/10 bg-surface-container-lowest/80 backdrop-blur-md w-full py-4 flat no shadows">
+<div class="flex flex-col md:flex-row justify-between items-center px-container-padding gap-4 w-full">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface">Data via Finnhub · Revalidates every 30 s</span>
+</div>
+<div class="flex items-center gap-6 font-caption text-caption">
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Terms</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">API Status</a>
+</div>
+</div>
+</footer>
+</body></html>

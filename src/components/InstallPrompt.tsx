@@ -31,9 +31,18 @@ export function InstallPrompt() {
   if (isStandalone || !installEvent) return null
 
   const install = async () => {
-    await installEvent.prompt()
-    await installEvent.userChoice
-    setInstallEvent(null)
+    if (!installEvent) return
+
+    try {
+      await installEvent.prompt()
+      const choice = await installEvent.userChoice
+      // The outcome can be used for analytics later if needed.
+      void choice.outcome
+    } catch (error) {
+      console.error('PWA install flow failed', error)
+    } finally {
+      setInstallEvent(null)
+    }
   }
 
   return (

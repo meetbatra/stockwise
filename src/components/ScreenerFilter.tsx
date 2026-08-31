@@ -24,6 +24,7 @@ export function ScreenerFilter({ activeScreener, onScreenerChange }: ScreenerFil
         <Button
           key={s.id}
           onClick={() => onScreenerChange(s.id)}
+          aria-pressed={activeScreener === s.id}
           variant={activeScreener === s.id ? 'default' : 'outline'}
           className={`rounded-full ${
             activeScreener === s.id

@@ -1,0 +1,13 @@
+url: https://stockwise-lemon-eight.vercel.app
+name: Stockwise screener filter
+tags:
+  - screener
+
+---
+
+- openLink: https://stockwise-lemon-eight.vercel.app
+- assertVisible: "Market Overview"
+- tapOn: "Day Gainers"
+- assertVisible: "Day Gainers"
+- assertVisible: "Search symbol or name..."
+- assertVisible: "Showing 1–10 of 50 stocks"

@@ -1,0 +1,11 @@
+url: https://stockwise-lemon-eight.vercel.app
+name: Stockwise smoke test
+tags:
+  - smoke
+
+---
+
+- openLink: https://stockwise-lemon-eight.vercel.app
+- assertVisible: "Market Overview"
+- assertVisible: "Most Actives"
+- assertVisible: "Search symbol or name..."

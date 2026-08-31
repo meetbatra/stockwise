@@ -1,0 +1,25 @@
+url: https://stockwise-lemon-eight.vercel.app
+name: Stockwise pagination
+tags:
+  - pagination
+
+---
+
+- openLink: https://stockwise-lemon-eight.vercel.app
+- assertVisible: "Market Overview"
+- assertVisible: "Showing 1–10 of 50 stocks"
+- scrollUntilVisible:
+    element: "2"
+    direction: DOWN
+- tapOn: "2"
+- assertVisible: "Showing 11–20 of 50 stocks"
+- scrollUntilVisible:
+    element: "3"
+    direction: DOWN
+- tapOn: "3"
+- assertVisible: "Showing 21–30 of 50 stocks"
+- scrollUntilVisible:
+    element: "5"
+    direction: DOWN
+- tapOn: "5"
+- assertVisible: "Showing 41–50 of 50 stocks"

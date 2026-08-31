@@ -1,0 +1,13 @@
+url: https://stockwise-lemon-eight.vercel.app
+name: Stockwise stock search
+tags:
+  - search
+
+---
+
+- openLink: https://stockwise-lemon-eight.vercel.app
+- assertVisible: "Market Overview"
+- tapOn: "Search symbol or name..."
+- inputText: "NVDA"
+- assertVisible: "NVDA"
+- assertVisible: "NVIDIA Corporation"

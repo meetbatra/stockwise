@@ -122,6 +122,7 @@ export function StockChart({ ticker, initialCandles, initialWeeklyCandles }: Sto
                 key={r.label}
                 onClick={() => setRangeIdx(i)}
                 disabled={isDisabled}
+                aria-pressed={i === rangeIdx}
                 className={cn(
                   'rounded px-2.5 py-1 text-xs font-medium transition-colors',
                   i === rangeIdx

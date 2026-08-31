@@ -1,0 +1,25 @@
+url: https://stockwise-lemon-eight.vercel.app
+name: Stockwise stock detail
+tags:
+  - detail
+
+---
+
+- openLink: https://stockwise-lemon-eight.vercel.app
+- assertVisible: "Market Overview"
+- tapOn: "Search symbol or name..."
+- inputText: "AAPL"
+- assertVisible: "AAPL"
+- assertVisible: "Apple Inc."
+- tapOn: "Apple Inc."
+- extendedWaitUntil:
+    visible: "Apple Inc."
+    timeout: 30000
+- assertVisible: "Apple Inc."
+- assertVisible: "AAPL.*NASDAQ.*USD"
+- assertVisible: "Price Chart"
+- scrollUntilVisible:
+    element: "Key Statistics"
+    direction: DOWN
+- assertVisible: "Key Statistics"
+- assertVisible: "Latest News"

@@ -1,0 +1,18 @@
+url: https://stockwise-lemon-eight.vercel.app
+name: Stockwise filter URL persistence
+tags:
+  - navigation
+  - url
+
+---
+
+- openLink: https://stockwise-lemon-eight.vercel.app
+- assertVisible: "Market Overview"
+- tapOn: "Day Gainers"
+- assertVisible:
+    css: 'button[aria-pressed="true"]'
+- openLink: https://stockwise-lemon-eight.vercel.app/?filter=day_gainers
+- assertVisible: "Market Overview"
+- assertVisible:
+    css: 'button[aria-pressed="true"]'
+- assertVisible: "Search symbol or name..."

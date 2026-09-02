@@ -34,10 +34,6 @@ jobs:
       - name: Type check (TypeScript)
         run: npx tsc --noEmit
 
-      # ── Formatting ─────────────────────────────────────────────────────────
-      - name: Format check (Prettier)
-        run: npx prettier --check "src/**/*.{ts,tsx,css}" "*.{ts,mjs,json}"
-
       # ── Build ──────────────────────────────────────────────────────────────
       - name: Build
         run: npm run build

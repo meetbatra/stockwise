@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Linting ────────────────────────────────────────────────────────────
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      # ── Type safety ────────────────────────────────────────────────────────
+      - name: Type check (TypeScript)
+        run: npx tsc --noEmit
+
+      # ── Formatting ─────────────────────────────────────────────────────────
+      - name: Format check (Prettier)
+        run: npx prettier --check "src/**/*.{ts,tsx,css}" "*.{ts,mjs,json}"
+
+      # ── Build ──────────────────────────────────────────────────────────────
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_APP_NAME: Stockwise
+          # FINNHUB_API_KEY is optional — omitting it is fine for a build check
+
+      # ── Security ───────────────────────────────────────────────────────────
+      - name: Dependency audit
+        # Warn on high/critical vulns but don't fail the build
+        run: npm audit --audit-level=critical || true
